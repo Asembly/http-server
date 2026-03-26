@@ -1,0 +1,32 @@
+package org.example.util;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class JsonBodyParser implements BodyParser{
+
+    private static final Logger log = LoggerFactory.getLogger(JsonBodyParser.class);
+    private final ObjectMapper objectMapper;
+
+    public JsonBodyParser() {
+        this.objectMapper = new ObjectMapper();
+    }
+
+    @Override
+    public boolean isParse(String body) {
+        try {
+            objectMapper.readTree(body);
+            return true;
+        } catch (JsonProcessingException e) {
+            log.debug("The body is not json object");
+            return false;
+        }
+    }
+
+    @Override
+    public <T> T parse(String json, Class<T> clazz) throws JsonProcessingException {
+        return objectMapper.readValue(json, clazz);
+    }
+}
