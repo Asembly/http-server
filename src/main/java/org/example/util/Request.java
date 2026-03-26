@@ -3,10 +3,8 @@ package org.example.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -15,7 +13,7 @@ import java.util.Map;
 public class Request {
 
     private static final Logger log = LoggerFactory.getLogger(Request.class);
-    private final BufferedReader buffReader;
+    private final InputStream inputStream;
 
     private Map<String, String> headers;
     private Map<String, String> params;
@@ -23,11 +21,10 @@ public class Request {
     private String uri;
     private String method;
     private String version;
-    private String body;
+    private byte[] body;
 
     public Request(InputStream inputStream) throws IOException {
-        this.buffReader = new BufferedReader(
-                new InputStreamReader(inputStream));
+        this.inputStream = inputStream;
         parse();
     }
 
@@ -66,7 +63,7 @@ public class Request {
 
         while(true)
         {
-            String line = buffReader.readLine();
+            String line = readLine();
 
             if(line.isEmpty())
                 break;
@@ -81,25 +78,26 @@ public class Request {
         return headers;
     }
 
-    private String parseBody() throws IOException {
+    private byte[] parseBody() throws IOException {
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 
-        char[] bodyChars = new char[contentLength];
+        byte[] bodyChars = new byte[contentLength];
         int read = 0;
 
         while(read < contentLength)
         {
-            int r = buffReader.read(bodyChars, read, contentLength - read);
+            int r = inputStream.read(bodyChars, read, contentLength - read);
             if(r == -1)
                 break;
             read += r;
         }
 
-        return new String(bodyChars, 0, read);
+        return bodyChars;
     }
 
     public void parse() throws IOException {
-        String line = buffReader.readLine();
+
+        String line = readLine();
         method = line.split(" ")[0];
         uri = line.split(" ")[1];
         version = line.split(" ")[2];
@@ -109,12 +107,22 @@ public class Request {
         body = parseBody();
     }
 
+    public String readLine() throws IOException {
+        StringBuilder builder = new StringBuilder();
+        int byteRead;
+        while((byteRead = inputStream.read()) != '\n')
+        {
+           if(byteRead != '\r') builder.append((char)byteRead);
+        }
+        return builder.toString();
+    }
+
     public String getMethod()
     {
         return method;
     }
 
-    public String getBody()
+    public byte[] getBody()
     {
         return body;
     }
