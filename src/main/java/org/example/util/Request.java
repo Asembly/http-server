@@ -21,6 +21,8 @@ public class Request {
     private String uri;
     private String method;
     private String version;
+    private String boundary;
+
     private byte[] body;
 
     public Request(InputStream inputStream) throws IOException {
@@ -72,6 +74,13 @@ public class Request {
 
             String key = line.substring(0, hdIndex);
             String value = line.substring(hdIndex+2);
+
+            if("Content-Type".equals(key) && value.contains("boundary"))
+            {
+                var temp = value.split("; ");
+                value = temp[0];
+                boundary = temp[1].split("=")[1];
+            }
 
             headers.put(key, value);
         }
@@ -129,6 +138,11 @@ public class Request {
 
     public String getVersion() {
         return version;
+    }
+
+    public String getBoundary()
+    {
+        return boundary;
     }
 
     public String getUri() {
