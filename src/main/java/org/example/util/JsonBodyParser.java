@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+
 public class JsonBodyParser implements BodyParser{
 
     private static final Logger log = LoggerFactory.getLogger(JsonBodyParser.class);
@@ -26,7 +28,7 @@ public class JsonBodyParser implements BodyParser{
     }
 
     @Override
-    public <T> T parse(String json, Class<T> clazz) throws JsonProcessingException {
-        return objectMapper.readValue(json, clazz);
+    public <T> T parse(byte[] json, Class<T> clazz) throws JsonProcessingException {
+        return objectMapper.readValue(Arrays.toString(json), clazz);
     }
 }

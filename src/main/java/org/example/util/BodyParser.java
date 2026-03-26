@@ -5,6 +5,6 @@ import java.io.IOException;
 public interface BodyParser {
 
     boolean isParse(String body);
-    <T> T parse(String body, Class<T> object) throws IOException;
+    <T> T parse(byte[] body, Class<T> object) throws IOException;
 
 }
