@@ -1,5 +1,6 @@
 package org.example.handler;
 
+import org.example.model.CreateFileDto;
 import org.example.service.FileService;
 import org.example.util.JsonBodyParser;
 import org.example.util.Request;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Base64;
 import java.util.UUID;
 
 public class FileHandler implements Handler{
@@ -63,16 +65,24 @@ public class FileHandler implements Handler{
         var body = request.getBody();
         var response = new Response.Builder(outputStream);
 
-        var filename = UUID.randomUUID().toString().substring(0,8) + request.getHeaders("X-Filename");
+        if (jsonParser.isParse(body)) {
 
-        fileService.saveFile(filename, body);
+            var dto = jsonParser.parse(body, CreateFileDto.class);
+            var resBody = "you loh";
+            var decoder = Base64.getDecoder();
 
-        log.debug("File created");
+            log.debug("Body can be parsed: {}", dto);
+            var filename = UUID.randomUUID().toString().substring(0,8) + dto.filename();
 
-        response.contentType("application/json")
-                .statusCode(200)
-                .body("You loh");
+            fileService.saveFile(filename, decoder.decode(dto.base64File().getBytes()));
 
-        SocketHandler.send(response.build());
+            log.debug("File created");
+
+            response.contentType("application/json")
+                    .statusCode(200)
+                    .body(resBody);
+
+            SocketHandler.send(response.build());
+        }
     }
 }
