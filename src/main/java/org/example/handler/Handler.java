@@ -1,11 +1,12 @@
 package org.example.handler;
 
 import org.example.util.Request;
-import org.example.util.Response;
+
+import java.io.OutputStream;
 
 @FunctionalInterface
 public interface Handler {
 
-    void handle(Request request, Response response);
+    void handle(Request request, OutputStream outputStream);
 
 }

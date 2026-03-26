@@ -1,31 +1,31 @@
 package org.example.util;
 
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Response {
 
     private final Map<String, String> headers;
+    private final String body;
+    private final int statusCode;
 
-    private String body;
+    private final OutputStream outputStream;
 
-    private int statusCode;
-
-    public Response(){
-        this.headers = new HashMap<>();
+    private Response(Map<String, String> headers, String body, int statusCode, OutputStream outputStream){
+        this.headers = headers;
+        this.body = body;
+        this.statusCode = statusCode;
+        this.outputStream = outputStream;
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
+    public OutputStream getOutputStream()
+    {
+        return outputStream;
     }
 
     public int getStatusCode() {
         return statusCode;
-    }
-
-    public void setBody(String body)
-    {
-        this.body = body;
     }
 
     public String getBody()
@@ -33,13 +33,57 @@ public class Response {
         return body;
     }
 
-    public void addHeader(String key, String value)
-    {
-        headers.put(key, value);
-    }
-
     public Map<String, String> getHeaders()
     {
-       return headers;
+        return  headers;
     }
+
+    public static class Builder
+    {
+        private Map<String, String> headers;
+        private OutputStream outputStream;
+
+        private String body;
+
+        private int statusCode;
+
+        public Builder(OutputStream outputStream)
+        {
+            headers = new HashMap<>();
+            headers.put("Connection", "close");
+            this.outputStream = outputStream;
+        }
+
+        public Builder contentType(String contentType)
+        {
+            headers.put("Content-Type", contentType);
+            return this;
+        }
+
+        public Builder statusCode(int statusCode)
+        {
+            this.statusCode = statusCode;
+            return this;
+        }
+
+        public Builder body(String body)
+        {
+            this.body = body;
+            headers.put("Content-Length", String.valueOf(body.length()));
+            return this;
+        }
+
+        public Builder addHeader(String key, String value)
+        {
+            this.headers.put(key, value);
+            return this;
+        }
+
+        public Response build()
+        {
+            return new Response(headers, body, statusCode, outputStream);
+        }
+
+    }
+
 }

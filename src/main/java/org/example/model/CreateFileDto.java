@@ -2,6 +2,6 @@ package org.example.model;
 
 public record CreateFileDto(
         String filename,
-        String base64
+        String base64File
 ) {
 }

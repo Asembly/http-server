@@ -84,14 +84,12 @@ public class Request {
     private String parseBody() throws IOException {
         int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
 
-        log.debug("Length: {}",contentLength);
         char[] bodyChars = new char[contentLength];
         int read = 0;
 
         while(read < contentLength)
         {
             int r = buffReader.read(bodyChars, read, contentLength - read);
-            log.debug("Body: {}",bodyChars);
             if(r == -1)
                 break;
             read += r;

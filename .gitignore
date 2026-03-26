@@ -39,4 +39,4 @@ build/
 .DS_Store
 
 ### Files folder ###
-src/main/resources/files/*
+src/main/resources/files

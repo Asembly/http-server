@@ -41,16 +41,14 @@ public class SocketHandler implements Runnable{
                     (_, _)->{}
             );
 
-            var response = new Response();
-            handler.handle(request, response);
-            send(response, output);
+            handler.handle(request, output);
         }
         catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    private void send(Response response, OutputStream output){
+    public static void send(Response response){
         StringBuilder sb = new StringBuilder();
 
         var statusCode = response.getStatusCode();
@@ -67,8 +65,8 @@ public class SocketHandler implements Runnable{
         sb.append(response.getBody());
 
         try{
-            output.write(sb.toString().getBytes());
-            output.flush();
+            response.getOutputStream().write(sb.toString().getBytes());
+            response.getOutputStream().flush();
         } catch (IOException e) {
             log.error(e.getMessage());
         }

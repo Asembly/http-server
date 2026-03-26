@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Base64;
+import java.util.UUID;
 
 public class FileHandler implements Handler{
     private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
@@ -23,7 +25,7 @@ public class FileHandler implements Handler{
     }
 
     @Override
-    public void handle(Request request, Response response) {
+    public void handle(Request request, OutputStream outputStream) {
         log.debug("File handler");
 
         var method = request.getMethod();
@@ -31,9 +33,9 @@ public class FileHandler implements Handler{
         try {
             switch (method) {
                 case "POST":
-                    handlePost(request, response);
+                    handlePost(request, outputStream);
                 case "GET":
-                    handleGet(request, response);
+                    handleGet(request, outputStream);
                     break;
             }
         } catch (IOException e) {
@@ -41,8 +43,9 @@ public class FileHandler implements Handler{
         }
     }
 
-    private void handleGet(Request request, Response response) throws IOException {
+    private void handleGet(Request request, OutputStream outputStream) throws IOException {
         var param = request.getParam("filename");
+        var response = new Response.Builder(outputStream);
 
         if(param.isEmpty())
         {
@@ -52,31 +55,34 @@ public class FileHandler implements Handler{
             {
                 sb.append(file.getFileName()).append("\r\n");
             }
-            response.setBody(sb.toString());
+            response.body(sb.toString());
         }
-        else
-        {
-            var file = fileService.getFile(param);
-            file.ifPresent(path -> response.setBody(path.toString()));
-        }
+
+        SocketHandler.send(response.build());
     }
 
-    private void handlePost(Request request, Response response) throws IOException {
+    private void handlePost(Request request, OutputStream outputStream) throws IOException {
         var body = request.getBody();
+        var response = new Response.Builder(outputStream);
 
         if (jsonParser.isParse(body)) {
+
             var dto = jsonParser.parse(body, CreateFileDto.class);
-            log.debug("Body can be parsed: {}", dto);
             var resBody = "you loh";
-            var contentLength = resBody.getBytes().length;
             var decoder = Base64.getDecoder();
-            fileService.saveFile(dto.filename(), decoder.decode(dto.base64().getBytes()));
+
+            log.debug("Body can be parsed: {}", dto);
+            var filename = UUID.randomUUID().toString().substring(0,8) + dto.filename();
+
+            fileService.saveFile(filename, decoder.decode(dto.base64File().getBytes()));
+
             log.debug("File created");
-            response.addHeader("Content-Type", "text/plain");
-            response.addHeader("Content-Length", String.valueOf(contentLength));
-            response.addHeader("Connection", "close");
-            response.setStatusCode(200);
-            response.setBody(resBody);
+
+            response.contentType("application/json")
+                    .statusCode(200)
+                    .body(resBody);
+
+            SocketHandler.send(response.build());
         }
     }
 }
