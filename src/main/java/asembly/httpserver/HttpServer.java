@@ -2,7 +2,7 @@ package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
 import asembly.httpserver.handler.Handler;
-import asembly.httpserver.handler.SocketHandler;
+import asembly.httpserver.handler.HttpSocketHandler;
 import asembly.httpserver.model.RouteKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class HttpServer {
             while(true)
             {
                 Socket client = server.accept();
-                new Thread(new SocketHandler(client, handlers)).start();
+                new Thread(new HttpSocketHandler(client, handlers)).start();
             }
         }
     }

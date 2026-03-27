@@ -1,19 +1,24 @@
 package asembly.httpserver.config;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+
 public class ServerConfig {
     private final String host;
     private final int port;
     private final int threads;
     private final String staticDir;
     private final boolean proxyEnabled;
+    private final List<InetSocketAddress> proxyUpstreams;
 
     public ServerConfig(String host, int port, int threads,
-                        String staticDir, boolean proxyEnabled) {
+                        String staticDir, boolean proxyEnabled, List<InetSocketAddress> proxyUpstreams) {
         this.host = host;
         this.port = port;
         this.threads = threads;
         this.staticDir = staticDir;
         this.proxyEnabled = proxyEnabled;
+        this.proxyUpstreams = proxyUpstreams;
     }
 
     public String getHost() { return host; }

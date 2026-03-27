@@ -14,8 +14,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class SocketHandler implements Runnable{
-    private static final Logger log = LoggerFactory.getLogger(SocketHandler.class);
+public class HttpSocketHandler implements ConnectionHandler{
+    private static final Logger log = LoggerFactory.getLogger(HttpSocketHandler.class);
 
     private final Map<RouteKey, Handler> handlers;
 
@@ -23,7 +23,7 @@ public class SocketHandler implements Runnable{
 
     private final RequestReader requestReader;
 
-    public SocketHandler(Socket client, Map<RouteKey, Handler> handlers) {
+    public HttpSocketHandler(Socket client, Map<RouteKey, Handler> handlers) {
         this.client = client;
         this.handlers = handlers;
         this.requestReader = new RequestReader();
@@ -53,6 +53,7 @@ public class SocketHandler implements Runnable{
         }
     }
 
+    @Override
     public void send(Response response, OutputStream output){
 
         if(response == null)
