@@ -1,12 +1,11 @@
 package asembly.httpserver.handler;
 
 import asembly.httpserver.util.Request;
-
-import java.io.OutputStream;
+import asembly.httpserver.util.Response;
 
 @FunctionalInterface
 public interface Handler {
 
-    void handle(Request request, OutputStream outputStream);
+    Response handle(Request request);
 
 }

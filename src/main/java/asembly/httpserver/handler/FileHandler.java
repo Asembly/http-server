@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,27 +28,28 @@ public class FileHandler implements Handler{
     }
 
     @Override
-    public void handle(Request request, OutputStream outputStream) {
+    public Response handle(Request request) {
         log.debug("File handler");
 
         var method = request.getMethod();
 
         try {
             switch (method) {
-                case "POST":
-                    handlePost(request, outputStream);
-                case "GET":
-                    handleGet(request, outputStream);
-                    break;
+                case "POST": return post(request);
+                case "GET": return get(request);
             }
         } catch (IOException e) {
             log.error(e.getMessage());
         }
+
+        return new Response.Builder()
+                .addHeader("Content-Type", "text/plain")
+                .statusCode(400).build();
     }
 
-    private void handleGet(Request request, OutputStream outputStream) throws IOException {
+    private Response get(Request request) throws IOException {
         var param = request.getParam("filename");
-        var response = new Response.Builder(outputStream);
+        var response = new Response.Builder();
 
         if(param.isEmpty())
         {
@@ -59,16 +59,19 @@ public class FileHandler implements Handler{
             {
                 sb.append(file.getFileName()).append("\r\n");
             }
-            response.body(sb.toString());
+            response.body(sb.toString().getBytes());
         }
 
-        SocketHandler.send(response.build());
+        return response.build();
     }
 
-    private void handlePost(Request request, OutputStream outputStream) throws IOException {
+    private Response post(Request request) throws IOException {
         var body = request.getBody();
         var contentType = request.getHeader("Content-Type");
-        var response = new Response.Builder(outputStream);
+        var response = new Response.Builder();
+        response.statusCode(200)
+                .addHeader("Content-Type", "text/plain")
+                .body("Idi nahuy".getBytes());
 
         List<Multipart> multipart = new ArrayList();
 
@@ -87,11 +90,6 @@ public class FileHandler implements Handler{
                     break;
             }
         }
-
-        response.contentType("application/json")
-                .statusCode(200)
-                .body("You loh");
-
-        SocketHandler.send(response.build());
+        return response.build();
     }
 }

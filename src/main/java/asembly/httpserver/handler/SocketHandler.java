@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class SocketHandler implements Runnable{
@@ -41,17 +42,18 @@ public class SocketHandler implements Runnable{
                             request.getMethod(),
                             request.getPath()
                     ),
-                    (_, _)->{}
+                    (_)-> null
             );
 
-            handler.handle(request, output);
+            var response = handler.handle(request);
+            send(response, output);
         }
         catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
-    public static void send(Response response){
+    public void send(Response response, OutputStream output){
         StringBuilder sb = new StringBuilder();
 
         var statusCode = response.getStatusCode();
@@ -65,11 +67,11 @@ public class SocketHandler implements Runnable{
 
         sb.append("\r\n");
 
-        sb.append(response.getBody());
+        sb.append(new String(response.getBody(), StandardCharsets.UTF_8));
 
         try{
-            response.getOutputStream().write(sb.toString().getBytes());
-            response.getOutputStream().flush();
+            output.write(sb.toString().getBytes());
+            output.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
         }

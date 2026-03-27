@@ -1,34 +1,25 @@
 package asembly.httpserver.util;
 
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Response {
 
     private final Map<String, String> headers;
-    private final String body;
+    private final byte[] body;
     private final int statusCode;
 
-    private final OutputStream outputStream;
-
-    private Response(Map<String, String> headers, String body, int statusCode, OutputStream outputStream){
+    private Response(Map<String, String> headers, byte[] body, int statusCode){
         this.headers = headers;
         this.body = body;
         this.statusCode = statusCode;
-        this.outputStream = outputStream;
-    }
-
-    public OutputStream getOutputStream()
-    {
-        return outputStream;
     }
 
     public int getStatusCode() {
         return statusCode;
     }
 
-    public String getBody()
+    public byte[] getBody()
     {
         return body;
     }
@@ -40,24 +31,14 @@ public class Response {
 
     public static class Builder
     {
-        private Map<String, String> headers;
-        private OutputStream outputStream;
+        private final Map<String, String> headers;
 
-        private String body;
-
+        private byte[] body;
         private int statusCode;
 
-        public Builder(OutputStream outputStream)
+        public Builder()
         {
             headers = new HashMap<>();
-            headers.put("Connection", "close");
-            this.outputStream = outputStream;
-        }
-
-        public Builder contentType(String contentType)
-        {
-            headers.put("Content-Type", contentType);
-            return this;
         }
 
         public Builder statusCode(int statusCode)
@@ -66,10 +47,9 @@ public class Response {
             return this;
         }
 
-        public Builder body(String body)
+        public Builder body(byte[] body)
         {
             this.body = body;
-            headers.put("Content-Length", String.valueOf(body.length()));
             return this;
         }
 
@@ -81,9 +61,8 @@ public class Response {
 
         public Response build()
         {
-            return new Response(headers, body, statusCode, outputStream);
+            return new Response(headers, body, statusCode);
         }
-
     }
 
 }
