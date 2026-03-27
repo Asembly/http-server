@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.UUID;
 
 public class FileHandler implements Handler{
     private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
@@ -62,10 +61,6 @@ public class FileHandler implements Handler{
     private void handlePost(Request request, OutputStream outputStream) throws IOException {
         var body = request.getBody();
         var response = new Response.Builder(outputStream);
-
-        var filename = UUID.randomUUID().toString().substring(0,8) + request.getHeaders("X-Filename");
-
-        fileService.saveFile(filename, body);
 
         log.debug("File created");
 

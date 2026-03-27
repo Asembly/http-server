@@ -27,7 +27,6 @@ public class JsonBodyParser implements BodyParser{
         }
     }
 
-    @Override
     public <T> T parse(byte[] json, Class<T> clazz) throws JsonProcessingException {
         return objectMapper.readValue(Arrays.toString(json), clazz);
     }
