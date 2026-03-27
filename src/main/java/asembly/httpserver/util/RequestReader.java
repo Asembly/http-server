@@ -8,19 +8,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public class RequestWriter {
+public class RequestReader {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
     private final Request.Builder builder;
     private final RequestParser parser;
 
-    public RequestWriter()
+    public RequestReader()
     {
        this.builder = new Request.Builder();
        this.parser = new RequestParser();
     }
 
-    public Request write(InputStream input) throws IOException {
+    public Request read(InputStream input) throws IOException {
         var startLine = parser.parseStartLine(readLine(input));
         var path = startLine.get(1);
         builder.method(startLine.getFirst());

@@ -2,7 +2,7 @@ package asembly.httpserver.handler;
 
 import asembly.httpserver.enums.StatusCode;
 import asembly.httpserver.model.RouteKey;
-import asembly.httpserver.util.RequestWriter;
+import asembly.httpserver.util.RequestReader;
 import asembly.httpserver.util.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +21,12 @@ public class SocketHandler implements Runnable{
 
     private final Socket client;
 
-    private final RequestWriter requestWriter;
+    private final RequestReader requestReader;
 
     public SocketHandler(Socket client, Map<RouteKey, Handler> handlers) {
         this.client = client;
         this.handlers = handlers;
-        this.requestWriter = new RequestWriter();
+        this.requestReader = new RequestReader();
     }
 
     @Override
@@ -34,7 +34,7 @@ public class SocketHandler implements Runnable{
         try(client; OutputStream output = client.getOutputStream();
         InputStream input = client.getInputStream())
         {
-            var request = requestWriter.write(input);
+            var request = requestReader.read(input);
             log.info("Client connected {} {} {}", client.getInetAddress().getHostAddress(), request.getMethod(), request.getPath());
 
             var handler = handlers.getOrDefault(
