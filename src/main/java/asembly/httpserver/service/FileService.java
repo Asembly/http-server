@@ -1,5 +1,6 @@
 package asembly.httpserver.service;
 
+import asembly.httpserver.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 public class FileService {
 
     private static final Logger log = LoggerFactory.getLogger(FileService.class);
-    private final Path rootDir = Paths.get("src/main/resources/files");
+    private final Path rootDir = Paths.get(HttpServer.getConfig().getStaticDir());
 
     public FileService()
     {

@@ -1,5 +1,6 @@
 package asembly.httpserver;
 
+import asembly.httpserver.config.ServerConfig;
 import asembly.httpserver.handler.Handler;
 import asembly.httpserver.handler.SocketHandler;
 import asembly.httpserver.model.RouteKey;
@@ -22,6 +23,8 @@ public class HttpServer {
     private final int port;
     private final int backlog;
 
+    private static ServerConfig config;
+
     private final Map<RouteKey, Handler> handlers;
 
     public HttpServer(String address, int port, int backlog) throws UnknownHostException {
@@ -33,6 +36,11 @@ public class HttpServer {
 
     public HttpServer(String address, int port) throws UnknownHostException {
         this(address, port, 0);
+    }
+
+    public HttpServer(ServerConfig config) throws UnknownHostException {
+        this(config.getHost(), config.getPort(), 0);
+        HttpServer.config = config;
     }
 
     public void start() throws IOException {
@@ -48,6 +56,10 @@ public class HttpServer {
         }
     }
 
+    public static ServerConfig getConfig()
+    {
+        return HttpServer.config;
+    }
 
     public void stop()
     {
