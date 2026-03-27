@@ -12,13 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MultipartBodyParser implements BodyParser {
+public class MultipartBodyParser {
 
     private static final Logger log = LoggerFactory.getLogger(MultipartBodyParser.class);
 
-    @Override
-    public boolean isParse(String body) {
-        return false;
+    public boolean isParse(String contentType) {
+        return "multipart/form-data".equals(contentType);
     }
 
     public List<Multipart> parse(byte[] body, String boundary) throws IOException {

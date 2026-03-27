@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
-public class JsonBodyParser implements BodyParser {
+public class JsonBodyParser{
 
     private static final Logger log = LoggerFactory.getLogger(JsonBodyParser.class);
     private final ObjectMapper objectMapper;
@@ -16,15 +16,8 @@ public class JsonBodyParser implements BodyParser {
         this.objectMapper = new ObjectMapper();
     }
 
-    @Override
-    public boolean isParse(String body) {
-        try {
-            objectMapper.readTree(body);
-            return true;
-        } catch (JsonProcessingException e) {
-            log.debug("The body is not json object");
-            return false;
-        }
+    public boolean isParse(String contentType) {
+        return "application/json".equals(contentType);
     }
 
     public <T> T parse(byte[] body, Class<T> clazz) throws JsonProcessingException {
