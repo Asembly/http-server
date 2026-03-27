@@ -1,11 +1,11 @@
-package org.example.util;
+package org.example.parser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
-public class MultipartBodyParser implements BodyParser{
+public class MultipartBodyParser implements BodyParser {
 
     private static final Logger log = LoggerFactory.getLogger(MultipartBodyParser.class);
 
@@ -18,15 +18,22 @@ public class MultipartBodyParser implements BodyParser{
 
         byte[] boundaryBytes = ("--" + boundary).getBytes(StandardCharsets.UTF_8);
 
-        for (int i = 0; i < body.length; i++) {
-            for (int j = i; j < body.length; j++) {
-                if(body[i] == body[j])
-                {
-                    log.debug("i : {}, j : {}",body[i], body[j]);
-                }
+        int i = 0, j = 0;
+        while(i < body.length)
+        {
+            if(j == boundaryBytes.length-1)
+            {
+                log.debug("Find the end of boundary: {}", body[j]);
+                break;
             }
+
+            if(body[i] == boundaryBytes[j])
+                j++;
+
+            i++;
         }
 
         return null;
     }
+
 }

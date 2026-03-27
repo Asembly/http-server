@@ -1,7 +1,8 @@
 package org.example.handler;
 
 import org.example.service.FileService;
-import org.example.util.JsonBodyParser;
+import org.example.parser.JsonBodyParser;
+import org.example.parser.MultipartBodyParser;
 import org.example.util.Request;
 import org.example.util.Response;
 import org.slf4j.Logger;
@@ -15,8 +16,10 @@ public class FileHandler implements Handler{
 
     private final FileService fileService;
     private final JsonBodyParser jsonParser;
+    private final MultipartBodyParser multipartParser;
 
     public FileHandler(){
+        this.multipartParser = new MultipartBodyParser();
         this.fileService = new FileService();
         this.jsonParser = new JsonBodyParser();
     }
@@ -61,6 +64,8 @@ public class FileHandler implements Handler{
     private void handlePost(Request request, OutputStream outputStream) throws IOException {
         var body = request.getBody();
         var response = new Response.Builder(outputStream);
+
+        multipartParser.parse(body, request.getBoundary());
 
         log.debug("File created");
 

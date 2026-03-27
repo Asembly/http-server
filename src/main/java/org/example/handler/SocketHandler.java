@@ -2,7 +2,7 @@ package org.example.handler;
 
 import org.example.enums.StatusCode;
 import org.example.model.RouteKey;
-import org.example.util.Request;
+import org.example.util.RequestWriter;
 import org.example.util.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +20,12 @@ public class SocketHandler implements Runnable{
 
     private final Socket client;
 
+    private final RequestWriter requestWriter;
+
     public SocketHandler(Socket client, Map<RouteKey, Handler> handlers) {
         this.client = client;
         this.handlers = handlers;
+        this.requestWriter = new RequestWriter();
     }
 
     @Override
@@ -30,13 +33,13 @@ public class SocketHandler implements Runnable{
         try(client; OutputStream output = client.getOutputStream();
         InputStream input = client.getInputStream())
         {
-            var request = new Request(input);
-            log.info("Client connected {} {} {}", client.getInetAddress().getHostAddress(), request.getMethod(), request.getUri());
+            var request = requestWriter.write(input);
+            log.info("Client connected {} {} {}", client.getInetAddress().getHostAddress(), request.getMethod(), request.getPath());
 
             var handler = handlers.getOrDefault(
                     new RouteKey(
                             request.getMethod(),
-                            Request.getPath(request.getUri())
+                            request.getPath()
                     ),
                     (_, _)->{}
             );

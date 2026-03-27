@@ -3,55 +3,32 @@ package org.example.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Request {
 
     private static final Logger log = LoggerFactory.getLogger(Request.class);
-    private final InputStream inputStream;
 
-    private Map<String, String> headers;
-    private Map<String, String> params;
+    private final Map<String, String> headers;
+    private final Map<String, String> params;
 
-    private String uri;
-    private String method;
-    private String version;
-    private String boundary;
+    private final String path;
+    private final String method;
+    private final String version;
+    private final String boundary;
 
-    private byte[] body;
+    private final byte[] body;
 
-    public Request(InputStream inputStream) throws IOException {
-        this.inputStream = inputStream;
-        parse();
-    }
-
-    private Map<String, String> parseParam()
+    private Request(Map<String, String> headers, Map<String, String> params, String path, String method, String version, String boundary, byte[] body)
     {
-        Map<String, String> params = new HashMap<>();
-
-        int queryStart = uri.indexOf('?');
-        if(queryStart == -1) return params;
-
-        String query = uri.substring(queryStart+1);
-
-        for(var param: query.split("&"))
-        {
-            int eqIndex = param.indexOf('=');
-            if(eqIndex > 0)
-            {
-                String key = param.substring(0, eqIndex);
-                String value = param.substring(eqIndex+1);
-
-                params.put(URLDecoder.decode(key, StandardCharsets.UTF_8),
-                        URLDecoder.decode(value, StandardCharsets.UTF_8));
-            }
-        }
-        return params;
+        this.headers = headers;
+        this.params = params;
+        this.path = path;
+        this.method = method;
+        this.version = version;
+        this.boundary = boundary;
+        this.body = body;
     }
 
     public static String getPath(String path)
@@ -60,80 +37,14 @@ public class Request {
         return queryStart == -1 ? path : path.substring(0,queryStart);
     }
 
-    private Map<String, String> parseHeader() throws IOException {
-        Map<String, String> headers = new HashMap<>();
-
-        while(true)
-        {
-            String line = readLine();
-
-            if(line.isEmpty())
-                break;
-
-            int hdIndex = line.indexOf(':');
-
-            String key = line.substring(0, hdIndex);
-            String value = line.substring(hdIndex+2);
-
-            if("Content-Type".equals(key) && value.contains("boundary"))
-            {
-                var temp = value.split("; ");
-                value = temp[0];
-                boundary = temp[1].split("=")[1];
-            }
-
-            headers.put(key, value);
-        }
-        return headers;
-    }
-
-    private byte[] parseBody() throws IOException {
-        int contentLength = Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
-
-        byte[] bodyChars = new byte[contentLength];
-        int read = 0;
-
-        while(read < contentLength)
-        {
-            int r = inputStream.read(bodyChars, read, contentLength - read);
-            if(r == -1)
-                break;
-            read += r;
-        }
-
-        return bodyChars;
-    }
-
-    public void parse() throws IOException {
-
-        String line = readLine();
-        method = line.split(" ")[0];
-        uri = line.split(" ")[1];
-        version = line.split(" ")[2];
-
-        params = parseParam();
-        headers = parseHeader();
-        body = parseBody();
-    }
-
-    public String readLine() throws IOException {
-        StringBuilder builder = new StringBuilder();
-        int byteRead;
-        while((byteRead = inputStream.read()) != '\n')
-        {
-           if(byteRead != '\r') builder.append((char)byteRead);
-        }
-        return builder.toString();
+    public byte[] getBody()
+    {
+        return body;
     }
 
     public String getMethod()
     {
         return method;
-    }
-
-    public byte[] getBody()
-    {
-        return body;
     }
 
     public String getVersion() {
@@ -145,8 +56,8 @@ public class Request {
         return boundary;
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 
     public String getParam(String key)
@@ -154,8 +65,91 @@ public class Request {
         return params.getOrDefault(key, "");
     }
 
-    public String getHeaders(String key)
+    public String getHeader(String key)
     {
         return headers.getOrDefault(key, "");
+    }
+
+    public static class Builder
+    {
+        private final Map<String, String> headers;
+        private final Map<String, String> params;
+
+        private byte[] body;
+
+        private String path;
+        private String method;
+        private String version;
+        private String boundary;
+
+        public Builder() {
+            this.headers = new HashMap<>();
+            this.params = new HashMap<>();
+        }
+
+        public Builder path(String path)
+        {
+            this.path = path;
+            return this;
+        }
+
+        public Builder method(String method)
+        {
+            this.method = method;
+            return this;
+        }
+
+        public Builder version(String version)
+        {
+            this.version = version;
+            return this;
+        }
+
+        public Builder boundary(String boundary)
+        {
+            this.boundary = boundary;
+            return this;
+        }
+
+        public Builder body(byte[] body)
+        {
+            this.body = body;
+            return this;
+        }
+
+        public Builder addHeader(String key, String value)
+        {
+            this.headers.put(key, value);
+            return this;
+        }
+
+        public Builder addHeader(Map<String, String> map)
+        {
+            this.headers.putAll(map);
+            return this;
+        }
+
+        public Builder addParam(String key, String value)
+        {
+            this.params.put(key, value);
+            return this;
+        }
+
+        public Builder addParam(Map<String, String> map)
+        {
+            this.params.putAll(map);
+            return this;
+        }
+
+        public String getHeader(String key)
+        {
+            return headers.getOrDefault(key, "");
+        }
+
+        public Request build()
+        {
+            return new Request(headers, params, path, method, version, boundary, body);
+        }
+
     }
 }
