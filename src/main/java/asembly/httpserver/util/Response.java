@@ -1,4 +1,4 @@
-package org.example.util;
+package asembly.httpserver.util;
 
 import java.io.OutputStream;
 import java.util.HashMap;

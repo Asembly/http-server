@@ -1,8 +1,8 @@
-package org.example;
+package asembly.httpserver;
 
-import org.example.handler.Handler;
-import org.example.handler.SocketHandler;
-import org.example.model.RouteKey;
+import asembly.httpserver.handler.Handler;
+import asembly.httpserver.handler.SocketHandler;
+import asembly.httpserver.model.RouteKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,6 +1,6 @@
-package org.example.handler;
+package asembly.httpserver.handler;
 
-import org.example.util.Request;
+import asembly.httpserver.util.Request;
 
 import java.io.OutputStream;
 

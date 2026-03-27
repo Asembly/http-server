@@ -1,3 +1,3 @@
-package org.example.model;
+package asembly.httpserver.model;
 
 public record RouteKey(String method, String path) {}

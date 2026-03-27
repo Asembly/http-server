@@ -1,4 +1,4 @@
-package org.example.enums;
+package asembly.httpserver.enums;
 
 public enum HttpMethod {
     POST("POST"),

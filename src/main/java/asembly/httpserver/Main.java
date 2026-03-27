@@ -1,6 +1,6 @@
-package org.example;
+package asembly.httpserver;
 
-import org.example.handler.FileHandler;
+import asembly.httpserver.handler.FileHandler;
 
 import java.io.IOException;
 

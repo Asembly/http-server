@@ -1,9 +1,9 @@
-package org.example.handler;
+package asembly.httpserver.handler;
 
-import org.example.enums.StatusCode;
-import org.example.model.RouteKey;
-import org.example.util.RequestWriter;
-import org.example.util.Response;
+import asembly.httpserver.enums.StatusCode;
+import asembly.httpserver.model.RouteKey;
+import asembly.httpserver.util.RequestWriter;
+import asembly.httpserver.util.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package org.example.parser;
+package asembly.httpserver.parser;
 
 import java.io.IOException;
 import java.io.InputStream;

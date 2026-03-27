@@ -1,4 +1,4 @@
-package org.example.model;
+package asembly.httpserver.model;
 
 public record CreateFileDto(
         String filename,

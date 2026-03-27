@@ -1,10 +1,10 @@
-package org.example.handler;
+package asembly.httpserver.handler;
 
-import org.example.service.FileService;
-import org.example.parser.JsonBodyParser;
-import org.example.parser.MultipartBodyParser;
-import org.example.util.Request;
-import org.example.util.Response;
+import asembly.httpserver.service.FileService;
+import asembly.httpserver.parser.JsonBodyParser;
+import asembly.httpserver.parser.MultipartBodyParser;
+import asembly.httpserver.util.Request;
+import asembly.httpserver.util.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

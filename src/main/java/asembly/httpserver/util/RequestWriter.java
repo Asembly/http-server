@@ -1,6 +1,6 @@
-package org.example.util;
+package asembly.httpserver.util;
 
-import org.example.parser.RequestParser;
+import asembly.httpserver.parser.RequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
