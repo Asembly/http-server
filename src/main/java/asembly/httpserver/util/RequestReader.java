@@ -48,9 +48,13 @@ public class RequestReader {
             }
             builder.addHeader(headers);
         }
-        int contentLength = Integer.parseInt(builder.getHeader("Content-Length"));
-        var body = parser.parseBody(input, contentLength);
-        builder.body(body);
+        if(!builder.getHeader("Content-Length").isEmpty())
+        {
+            int contentLength = Integer.parseInt(builder.getHeader("Content-Length"));
+            var body = parser.parseBody(input, contentLength);
+            builder.body(body);
+        }
+
         return builder.build();
     }
 

@@ -50,6 +50,9 @@ public class FileHandler implements Handler{
     private Response get(Request request) throws IOException {
         var param = request.getParam("filename");
         var response = new Response.Builder();
+        response.statusCode(200)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Connection", "close");
 
         if(param.isEmpty())
         {
@@ -59,7 +62,9 @@ public class FileHandler implements Handler{
             {
                 sb.append(file.getFileName()).append("\r\n");
             }
-            response.body(sb.toString().getBytes());
+            var body = sb.toString();
+            response.body(body.getBytes());
+            response.addHeader("Content-Length", String.valueOf(body.length()));
         }
 
         return response.build();

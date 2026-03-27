@@ -54,6 +54,10 @@ public class SocketHandler implements Runnable{
     }
 
     public void send(Response response, OutputStream output){
+
+        if(response == null)
+            return;
+
         StringBuilder sb = new StringBuilder();
 
         var statusCode = response.getStatusCode();
