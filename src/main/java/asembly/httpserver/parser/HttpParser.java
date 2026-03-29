@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RequestParser {
+public class HttpParser {
 
     public Map<String, String> parseHeader(String line) throws IOException {
         Map<String, String> headers = new HashMap<>();
