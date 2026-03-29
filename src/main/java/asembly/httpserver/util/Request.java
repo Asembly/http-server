@@ -70,6 +70,11 @@ public class Request {
         return headers.getOrDefault(key, "");
     }
 
+    public Map<String, String> getHeaders()
+    {
+        return headers;
+    }
+
     public static class Builder
     {
         private final Map<String, String> headers;
