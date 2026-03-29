@@ -3,8 +3,9 @@ package asembly.httpserver.config;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 public class ServerConfigLoader {
@@ -20,14 +21,12 @@ public class ServerConfigLoader {
         String staticDir = props.getProperty("server.staticDir", "./public");
         boolean proxyEnabled = Boolean.parseBoolean(props.getProperty("proxy.enabled", "false"));
         String proxyUpstreams = props.getProperty("proxy.upstreams", "");
-        List<InetSocketAddress> upstreams = new ArrayList<>();
+        Map<String,InetSocketAddress> upstreams = new HashMap<>();
 
         for(var item: proxyUpstreams.split(","))
         {
-            item = item.trim();
-            if(item.isEmpty()) continue;
-            String[] parts = item.split(":");
-            upstreams.add(new InetSocketAddress(parts[0], Integer.parseInt(parts[1])));
+            URL url = new URL(item);
+            upstreams.put(url.getPath(),new InetSocketAddress(url.getHost(), url.getPort()));
         }
 
         return new ServerConfig(host, port, threads, staticDir, proxyEnabled, upstreams);

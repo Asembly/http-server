@@ -1,7 +1,7 @@
 package asembly.httpserver.config;
 
 import java.net.InetSocketAddress;
-import java.util.List;
+import java.util.Map;
 
 public class ServerConfig {
     private final String host;
@@ -9,10 +9,10 @@ public class ServerConfig {
     private final int threads;
     private final String staticDir;
     private final boolean proxyEnabled;
-    private final List<InetSocketAddress> proxyUpstreams;
+    private final Map<String, InetSocketAddress> proxyUpstreams;
 
     public ServerConfig(String host, int port, int threads,
-                        String staticDir, boolean proxyEnabled, List<InetSocketAddress> proxyUpstreams) {
+                        String staticDir, boolean proxyEnabled, Map<String, InetSocketAddress> proxyUpstreams) {
         this.host = host;
         this.port = port;
         this.threads = threads;
@@ -26,5 +26,6 @@ public class ServerConfig {
     public int getThreads() { return threads; }
     public String getStaticDir() { return staticDir; }
     public boolean isProxyEnabled() { return proxyEnabled; }
-    public List<InetSocketAddress> getProxyUpstreams() { return proxyUpstreams; }
+    public Map<String, InetSocketAddress> getProxyUpstreams() { return proxyUpstreams; }
+    public Map<String, InetSocketAddress> getAddressUpstreamFromRoute() { return proxyUpstreams; }
 }
