@@ -1,34 +1,30 @@
 package asembly.httpserver.util;
 
 import asembly.httpserver.parser.HttpParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public class RequestReader extends HttpReader{
+public class ResponseReader extends HttpReader{
 
-    private static final Logger log = LoggerFactory.getLogger(RequestReader.class);
-    private final Request.Builder builder;
+    private final Response.Builder builder;
     private final HttpParser parser;
 
-    public RequestReader()
+    public ResponseReader()
     {
-       this.builder = new Request.Builder();
-       this.parser = new HttpParser();
+        this.builder = new Response.Builder();
+        this.parser = new HttpParser();
     }
 
     @Override
-    public Request read(InputStream input) throws IOException {
+    protected Response read(InputStream input) throws IOException {
         var startLine = parser.parseStartLine(readLine(input));
-        var path = startLine.get(1);
+        var version = startLine.get(0);
+        var statusCode = startLine.get(1);
 
-        builder.method(startLine.getFirst());
-        builder.path(path);
-        builder.version(startLine.getLast());
-        builder.addParam(parser.parseParam(path));
+        builder.statusCode(Integer.parseInt(statusCode));
+        builder.version(version);
 
         while(true) {
             String line = readLine(input);

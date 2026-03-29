@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Request {
+public class Request extends HttpMessage{
 
     private static final Logger log = LoggerFactory.getLogger(Request.class);
 
@@ -22,6 +22,7 @@ public class Request {
 
     private Request(Map<String, String> headers, Map<String, String> params, String path, String method, String version, String boundary, byte[] body)
     {
+        super(headers, body, boundary, version);
         this.headers = headers;
         this.params = params;
         this.path = path;
@@ -47,15 +48,6 @@ public class Request {
         return method;
     }
 
-    public String getVersion() {
-        return version;
-    }
-
-    public String getBoundary()
-    {
-        return boundary;
-    }
-
     public String getPath() {
         return path;
     }
@@ -75,22 +67,11 @@ public class Request {
         return headers;
     }
 
-    public static class Builder
+    public static class Builder extends HttpMessage.Builder<Builder, HttpMessage>
     {
-        private final Map<String, String> headers;
-        private final Map<String, String> params;
-
-        private byte[] body;
-
+        private final Map<String, String> params = new HashMap<>();
         private String path;
         private String method;
-        private String version;
-        private String boundary;
-
-        public Builder() {
-            this.headers = new HashMap<>();
-            this.params = new HashMap<>();
-        }
 
         public Builder path(String path)
         {
@@ -101,36 +82,6 @@ public class Request {
         public Builder method(String method)
         {
             this.method = method;
-            return this;
-        }
-
-        public Builder version(String version)
-        {
-            this.version = version;
-            return this;
-        }
-
-        public Builder boundary(String boundary)
-        {
-            this.boundary = boundary;
-            return this;
-        }
-
-        public Builder body(byte[] body)
-        {
-            this.body = body;
-            return this;
-        }
-
-        public Builder addHeader(String key, String value)
-        {
-            this.headers.put(key, value);
-            return this;
-        }
-
-        public Builder addHeader(Map<String, String> map)
-        {
-            this.headers.putAll(map);
             return this;
         }
 
@@ -146,11 +97,12 @@ public class Request {
             return this;
         }
 
-        public String getHeader(String key)
-        {
-            return headers.getOrDefault(key, "");
+        @Override
+        protected Builder self() {
+            return this;
         }
 
+        @Override
         public Request build()
         {
             return new Request(headers, params, path, method, version, boundary, body);
