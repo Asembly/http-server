@@ -14,8 +14,7 @@ public abstract class HttpReader {
             if(byteRead == -1) break;
             if(byteRead != '\r') builder.append((char)byteRead);
         }
-
-        if(builder.isEmpty() && byteRead == -1)
+        if(builder.isEmpty())
             throw new IOException("HTTP message sent empty");
 
         return builder.toString();
