@@ -2,6 +2,7 @@ package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
 import asembly.httpserver.handler.Handler;
+import asembly.httpserver.handler.HttpSocketHandler;
 import asembly.httpserver.model.RouteKey;
 import asembly.httpserver.proxy.ProxySocketHandler;
 import org.slf4j.Logger;
@@ -47,13 +48,20 @@ public class HttpServer {
         try(var server = new ServerSocket(port, backlog, address))
         {
             log.info("Server started {}:{}", address.getHostAddress(), port);
-            log.info("The server is running in proxy mode.");
+
+            if(config.isProxyEnabled())
+                log.info("The server is running in proxy mode");
+            else
+                log.info("The server is running in default mode");
 
             while(true)
             {
                 Socket client = server.accept();
-//                new Thread(new HttpSocketHandler(client, handlers)).start();
-                new Thread(new ProxySocketHandler(client, handlers)).start();
+
+                if(config.isProxyEnabled())
+                    new Thread(new ProxySocketHandler(client, handlers)).start();
+                else
+                    new Thread(new HttpSocketHandler(client, handlers)).start();
             }
         }
     }

@@ -46,14 +46,11 @@ public class ProxySocketHandler extends ConnectionHandler {
 
             log.info("Client connected {} {} {}", client.getInetAddress().getHostAddress(), request.getMethod(), request.getPath());
 
-            var upstreams = HttpServer.getConfig().getProxyUpstreams();
+            var upstreams = HttpServer.getConfig().getAddressUpstreamFromRoute();
+            var routeUpstream = upstreams.get(request.getBasePath());
 
-            switch(request.getPath())
-            {
-                case "/ping":
-                    proxy(request, output, upstreams.get(0));
-                    break;
-            }
+            if(routeUpstream != null)
+                proxy(request, output, routeUpstream);
 
         }
         catch (IOException e) {
