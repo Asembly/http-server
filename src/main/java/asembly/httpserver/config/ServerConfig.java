@@ -26,4 +26,5 @@ public class ServerConfig {
     public int getThreads() { return threads; }
     public String getStaticDir() { return staticDir; }
     public boolean isProxyEnabled() { return proxyEnabled; }
+    public List<InetSocketAddress> getProxyUpstreams() { return proxyUpstreams; }
 }

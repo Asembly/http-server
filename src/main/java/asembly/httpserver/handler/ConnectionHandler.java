@@ -13,7 +13,7 @@ public abstract class ConnectionHandler implements Runnable{
 
     private static final Logger log = LoggerFactory.getLogger(ConnectionHandler.class);
 
-    void send(Response response, OutputStream output)
+    public void send(Response response, OutputStream output)
     {
         if(response == null)
             return;

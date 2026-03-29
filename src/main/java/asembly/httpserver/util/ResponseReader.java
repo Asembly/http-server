@@ -18,7 +18,7 @@ public class ResponseReader extends HttpReader{
     }
 
     @Override
-    protected Response read(InputStream input) throws IOException {
+    public Response read(InputStream input) throws IOException {
         var startLine = parser.parseStartLine(readLine(input));
         var version = startLine.get(0);
         var statusCode = startLine.get(1);
