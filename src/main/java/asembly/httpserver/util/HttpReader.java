@@ -11,8 +11,13 @@ public abstract class HttpReader {
         int byteRead;
         while((byteRead = input.read()) != '\n')
         {
+            if(byteRead == -1) break;
             if(byteRead != '\r') builder.append((char)byteRead);
         }
+
+        if(builder.isEmpty() && byteRead == -1)
+            throw new IOException("HTTP message sent empty");
+
         return builder.toString();
     }
 }
