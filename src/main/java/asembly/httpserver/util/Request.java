@@ -32,10 +32,22 @@ public class Request extends HttpMessage{
         this.body = body;
     }
 
-    public static String getPath(String path)
+    public String getPathWithoutQuery(String path)
     {
         int queryStart = path.indexOf('?');
         return queryStart == -1 ? path : path.substring(0,queryStart);
+    }
+
+    public String getBasePath()
+    {
+        int secondSlash = path.indexOf('/', 1);
+
+        String root;
+        if(secondSlash == -1)
+           root = path;
+        else
+            root = path.substring(0, secondSlash);
+        return root;
     }
 
     public byte[] getBody()
