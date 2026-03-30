@@ -15,6 +15,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HttpServer {
 
@@ -27,6 +29,7 @@ public class HttpServer {
     private static ServerConfig config;
 
     private final Map<RouteKey, Handler> handlers;
+    ExecutorService pool = Executors.newFixedThreadPool(100);
 
     public HttpServer(String address, int port, int backlog) throws UnknownHostException {
         this.address = InetAddress.getByName(address);
@@ -35,13 +38,9 @@ public class HttpServer {
         this.handlers = new HashMap<>();
     }
 
-    public HttpServer(String address, int port) throws UnknownHostException {
-        this(address, port, 0);
-    }
-
     public HttpServer(ServerConfig config) throws UnknownHostException {
-        this(config.getHost(), config.getPort(), 0);
-        HttpServer.config = config;
+        this(config.getHost(), config.getPort(), config.getBacklog());
+        this.config = config;
     }
 
     public void start() throws IOException {
@@ -57,11 +56,13 @@ public class HttpServer {
             while(true)
             {
                 Socket client = server.accept();
+                client.setSoTimeout(5000);
 
-                if(config.isProxyEnabled())
-                    new Thread(new ProxySocketHandler(client, handlers)).start();
-                else
-                    new Thread(new HttpSocketHandler(client, handlers)).start();
+                Runnable task = config.isProxyEnabled()
+                        ? new ProxySocketHandler(client, handlers)
+                        : new HttpSocketHandler(client, handlers);
+
+                pool.submit(task);
             }
         }
     }
