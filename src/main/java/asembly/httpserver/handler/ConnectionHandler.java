@@ -31,10 +31,14 @@ public abstract class ConnectionHandler implements Runnable{
 
         sb.append("\r\n");
 
-        sb.append(new String(response.getBody(), StandardCharsets.UTF_8));
-
         try{
-            output.write(sb.toString().getBytes());
+            output.write(sb.toString().getBytes(StandardCharsets.UTF_8));
+
+            if(response.getBody() != null && response.getBody().length > 0)
+            {
+                output.write(response.getBody());
+            }
+
             output.flush();
         } catch (IOException e) {
             log.error(e.getMessage());
