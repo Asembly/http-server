@@ -1,18 +1,13 @@
 package asembly.httpserver.handler;
 
-import asembly.httpserver.model.Multipart;
+import asembly.httpserver.http.Request;
+import asembly.httpserver.http.Response;
+import asembly.httpserver.http.ResponseFabric;
 import asembly.httpserver.parser.JsonBodyParser;
 import asembly.httpserver.parser.MultipartBodyParser;
 import asembly.httpserver.service.FileService;
-import asembly.httpserver.util.Request;
-import asembly.httpserver.util.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class FileHandler implements Handler{
     private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
@@ -29,72 +24,49 @@ public class FileHandler implements Handler{
 
     @Override
     public Response handle(Request request) {
-        log.debug("File handler");
 
-        var method = request.getMethod();
-
-        try {
-            switch (method) {
-                case "POST": return post(request);
-                case "GET": return get(request);
-            }
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-
-        return new Response.Builder()
-                .addHeader("Content-Type", "text/plain")
-                .statusCode(400).build();
+        return get(request);
     }
 
-    private Response get(Request request) throws IOException {
+    private Response get(Request request) {
         var param = request.getParam("filename");
-        var response = new Response.Builder();
-        response.statusCode(200)
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Connection", "close");
 
         if(param.isEmpty())
         {
             StringBuilder sb = new StringBuilder();
-            sb.append("List of file on server\r\n\r\n");
+            sb.append("List files of server: \r\n");
             for(var file: fileService.getFiles())
             {
                 sb.append(file.getFileName()).append("\r\n");
             }
-            var body = sb.toString();
-            response.body(body.getBytes());
-            response.addHeader("Content-Length", String.valueOf(body.length()));
+            return ResponseFabric.ok(sb.toString().getBytes());
         }
 
-        return response.build();
+        return ResponseFabric.notFound();
     }
 
-    private Response post(Request request) throws IOException {
-        var body = request.getBody();
-        var contentType = request.getHeader("Content-Type");
-        var response = new Response.Builder();
-        response.statusCode(200)
-                .addHeader("Content-Type", "text/plain")
-                .body("Idi nahuy".getBytes());
-
-        List<Multipart> multipart = new ArrayList();
-
-        if(multipartParser.isParse(contentType))
-            multipart.addAll(multipartParser.parse(body, request.getBoundary()));
-
-        for(var part: multipart)
-        {
-            switch(part.headers.get("Content-Type"))
-            {
-                case "application/json":
-                    break;
-                case "image/png":
-                    var filename = UUID.randomUUID().toString().substring(0, 8) + "image.png";
-                    fileService.saveFile(filename, part.content);
-                    break;
-            }
-        }
-        return response.build();
-    }
+    // TODO на переделку, сделать нормальную работу с файлом, парсить filename из заголовков
+//    private Response post(Request request) throws IOException {
+//        var body = request.getBody();
+//        var contentType = request.getHeader("Content-Type");
+//
+//        List<Multipart> multipart = new ArrayList();
+//
+//        if(multipartParser.isParse(contentType))
+//            multipart.addAll(multipartParser.parse(body, request.getBoundary()));
+//
+//        for(var part: multipart)
+//        {
+//            switch(part.headers.get("Content-Type"))
+//            {
+//                case "application/json":
+//                    break;
+//                case "image/png":
+//                    var filename = UUID.randomUUID().toString().substring(0, 8) + "image.png";
+//                    fileService.saveFile(filename, part.content);
+//                    break;
+//            }
+//        }
+//        return ResponseFabric.notFound();
+//    }
 }

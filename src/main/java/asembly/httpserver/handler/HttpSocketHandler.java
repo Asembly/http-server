@@ -1,7 +1,7 @@
 package asembly.httpserver.handler;
 
 import asembly.httpserver.model.RouteKey;
-import asembly.httpserver.util.RequestReader;
+import asembly.httpserver.http.io.RequestReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

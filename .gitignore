@@ -40,6 +40,7 @@ build/
 
 ### Files folder ###
 src/main/resources/files
+/public
 
 ### POM FILES ###
 ./dependency-reduced-pom.xml

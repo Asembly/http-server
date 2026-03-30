@@ -1,7 +1,7 @@
 package asembly.httpserver.handler;
 
 import asembly.httpserver.enums.StatusCode;
-import asembly.httpserver.util.Response;
+import asembly.httpserver.http.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

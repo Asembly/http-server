@@ -1,8 +1,8 @@
 package asembly.httpserver.proxy;
 
 import asembly.httpserver.handler.Handler;
-import asembly.httpserver.util.Request;
-import asembly.httpserver.util.Response;
+import asembly.httpserver.http.Request;
+import asembly.httpserver.http.Response;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;

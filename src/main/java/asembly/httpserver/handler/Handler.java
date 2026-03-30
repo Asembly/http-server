@@ -1,7 +1,7 @@
 package asembly.httpserver.handler;
 
-import asembly.httpserver.util.Request;
-import asembly.httpserver.util.Response;
+import asembly.httpserver.http.Request;
+import asembly.httpserver.http.Response;
 
 @FunctionalInterface
 public interface Handler {

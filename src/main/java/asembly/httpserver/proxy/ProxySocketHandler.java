@@ -4,9 +4,9 @@ import asembly.httpserver.HttpServer;
 import asembly.httpserver.handler.ConnectionHandler;
 import asembly.httpserver.handler.Handler;
 import asembly.httpserver.model.RouteKey;
-import asembly.httpserver.util.Request;
-import asembly.httpserver.util.RequestReader;
-import asembly.httpserver.util.ResponseReader;
+import asembly.httpserver.http.Request;
+import asembly.httpserver.http.io.RequestReader;
+import asembly.httpserver.http.io.ResponseReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
