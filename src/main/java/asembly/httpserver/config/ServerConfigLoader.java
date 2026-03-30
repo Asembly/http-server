@@ -17,6 +17,7 @@ public class ServerConfigLoader {
 
         String host = props.getProperty("server.host", "0.0.0.0");
         int port = Integer.parseInt(props.getProperty("server.port", "8080"));
+        int backlog = Integer.parseInt(props.getProperty("server.backlog", "1"));
         int threads = Integer.parseInt(props.getProperty("server.threads", "8"));
         String staticDir = props.getProperty("server.staticDir", "./public");
         boolean proxyEnabled = Boolean.parseBoolean(props.getProperty("proxy.enabled", "false"));
@@ -29,6 +30,6 @@ public class ServerConfigLoader {
             upstreams.put(url.getPath(),new InetSocketAddress(url.getHost(), url.getPort()));
         }
 
-        return new ServerConfig(host, port, threads, staticDir, proxyEnabled, upstreams);
+        return new ServerConfig(host, port, threads, staticDir, proxyEnabled, upstreams, backlog);
     }
 }

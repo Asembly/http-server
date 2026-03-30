@@ -9,20 +9,24 @@ public class ServerConfig {
     private final int threads;
     private final String staticDir;
     private final boolean proxyEnabled;
+    private final int backlog;
     private final Map<String, InetSocketAddress> proxyUpstreams;
 
     public ServerConfig(String host, int port, int threads,
-                        String staticDir, boolean proxyEnabled, Map<String, InetSocketAddress> proxyUpstreams) {
+                        String staticDir, boolean proxyEnabled, Map<String, InetSocketAddress> proxyUpstreams,
+                        int backlog) {
         this.host = host;
         this.port = port;
         this.threads = threads;
         this.staticDir = staticDir;
         this.proxyEnabled = proxyEnabled;
         this.proxyUpstreams = proxyUpstreams;
+        this.backlog = backlog;
     }
 
     public String getHost() { return host; }
     public int getPort() { return port; }
+    public int getBacklog() { return backlog; };
     public int getThreads() { return threads; }
     public String getStaticDir() { return staticDir; }
     public boolean isProxyEnabled() { return proxyEnabled; }
