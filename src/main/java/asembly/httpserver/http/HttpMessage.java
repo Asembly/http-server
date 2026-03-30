@@ -1,4 +1,4 @@
-package asembly.httpserver.util;
+package asembly.httpserver.http;
 
 import java.util.HashMap;
 import java.util.Map;

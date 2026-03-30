@@ -1,4 +1,6 @@
-package asembly.httpserver.util;
+package asembly.httpserver.http.io;
+
+import asembly.httpserver.http.HttpMessage;
 
 import java.io.IOException;
 import java.io.InputStream;
