@@ -69,9 +69,9 @@ public abstract class HttpMessage {
             return self();
         }
 
-        public B addHeaders(Map<String, String> map)
+        public B addHeaders(Map<String, String> headers)
         {
-            this.headers.putAll(map);
+            this.headers.putAll(headers);
             return self();
         }
 

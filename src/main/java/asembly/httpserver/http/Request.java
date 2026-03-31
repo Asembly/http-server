@@ -10,26 +10,17 @@ public class Request extends HttpMessage{
 
     private static final Logger log = LoggerFactory.getLogger(Request.class);
 
-    private final Map<String, String> headers;
     private final Map<String, String> params;
 
     private final String path;
     private final String method;
-    private final String version;
-    private final String boundary;
-
-    private final byte[] body;
 
     private Request(Map<String, String> headers, Map<String, String> params, String path, String method, String version, String boundary, byte[] body)
     {
         super(headers, body, boundary, version);
-        this.headers = headers;
         this.params = params;
         this.path = path;
         this.method = method;
-        this.version = version;
-        this.boundary = boundary;
-        this.body = body;
     }
 
     public String getPathWithoutQuery(String path)
@@ -50,11 +41,6 @@ public class Request extends HttpMessage{
         return root;
     }
 
-    public byte[] getBody()
-    {
-        return body;
-    }
-
     public String getMethod()
     {
         return method;
@@ -67,16 +53,6 @@ public class Request extends HttpMessage{
     public String getParam(String key)
     {
         return params.getOrDefault(key, "");
-    }
-
-    public String getHeader(String key)
-    {
-        return headers.getOrDefault(key, "");
-    }
-
-    public Map<String, String> getHeaders()
-    {
-        return headers;
     }
 
     public static class Builder extends HttpMessage.Builder<Builder, HttpMessage>

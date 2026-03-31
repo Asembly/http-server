@@ -4,14 +4,10 @@ import java.util.Map;
 
 public class Response extends HttpMessage {
 
-    private final Map<String, String> headers;
-    private final byte[] body;
     private final int statusCode;
 
     private Response(Map<String, String> headers, byte[] body, int statusCode, String boundary, String version){
         super(headers, body, boundary, version);
-        this.headers = headers;
-        this.body = body;
         this.statusCode = statusCode;
     }
 
