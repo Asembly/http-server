@@ -2,7 +2,7 @@ package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
 import asembly.httpserver.config.ServerConfigLoader;
-import asembly.httpserver.handler.FileHandler;
+import asembly.httpserver.http.handler.InfoHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +19,7 @@ public class Main {
             log.info("The configuration file has been loaded.");
 
             HttpServer server = new HttpServer(config);
-            server.addHandler("GET", "/files", new FileHandler());
-            server.addHandler("POST", "/files", new FileHandler());
+            server.addHandler("GET", "/info", new InfoHandler());
             server.start();
 
         } catch (IOException e) {
