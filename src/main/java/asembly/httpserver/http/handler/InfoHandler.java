@@ -1,4 +1,4 @@
-package asembly.httpserver.handler;
+package asembly.httpserver.http.handler;
 
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
@@ -8,6 +8,8 @@ import asembly.httpserver.parser.MultipartBodyParser;
 import asembly.httpserver.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class FileHandler implements Handler{
     private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
@@ -29,17 +31,11 @@ public class FileHandler implements Handler{
     }
 
     private Response get(Request request) {
-        var param = request.getParam("filename");
-
-        if(param.isEmpty())
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.append("List files of server: \r\n");
-            for(var file: fileService.getFiles())
-            {
-                sb.append(file.getFileName()).append("\r\n");
-            }
-            return ResponseFabric.ok(sb.toString().getBytes());
+        try{
+            var response = ResponseFabric.ok(fileService.getFile("index.html"), "text/html");
+            return response;
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
 
         return ResponseFabric.notFound();
