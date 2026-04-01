@@ -11,14 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class FileHandler implements Handler{
-    private static final Logger log = LoggerFactory.getLogger(FileHandler.class);
+public class InfoHandler implements Handler{
+    private static final Logger log = LoggerFactory.getLogger(InfoHandler.class);
 
     private final FileService fileService;
     private final JsonBodyParser jsonParser;
     private final MultipartBodyParser multipartParser;
 
-    public FileHandler(){
+    public InfoHandler(){
         this.multipartParser = new MultipartBodyParser();
         this.fileService = new FileService();
         this.jsonParser = new JsonBodyParser();
@@ -26,43 +26,12 @@ public class FileHandler implements Handler{
 
     @Override
     public Response handle(Request request) {
-
-        return get(request);
-    }
-
-    private Response get(Request request) {
         try{
-            var response = ResponseFabric.ok(fileService.getFile("index.html"), "text/html");
-            return response;
+            return ResponseFabric.ok(fileService.getFile("index.html"), "text/html");
         } catch (IOException e) {
             log.error(e.getMessage());
         }
 
         return ResponseFabric.notFound();
     }
-
-    // TODO на переделку, сделать нормальную работу с файлом, парсить filename из заголовков
-//    private Response post(Request request) throws IOException {
-//        var body = request.getBody();
-//        var contentType = request.getHeader("Content-Type");
-//
-//        List<Multipart> multipart = new ArrayList();
-//
-//        if(multipartParser.isParse(contentType))
-//            multipart.addAll(multipartParser.parse(body, request.getBoundary()));
-//
-//        for(var part: multipart)
-//        {
-//            switch(part.headers.get("Content-Type"))
-//            {
-//                case "application/json":
-//                    break;
-//                case "image/png":
-//                    var filename = UUID.randomUUID().toString().substring(0, 8) + "image.png";
-//                    fileService.saveFile(filename, part.content);
-//                    break;
-//            }
-//        }
-//        return ResponseFabric.notFound();
-//    }
 }

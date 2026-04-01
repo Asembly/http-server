@@ -1,4 +1,4 @@
-package asembly.httpserver.handler;
+package asembly.httpserver.http.handler;
 
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
