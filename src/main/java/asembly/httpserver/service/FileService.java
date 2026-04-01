@@ -57,14 +57,14 @@ public class FileService {
         return paths;
     }
 
-    public Optional<Path> getFile(String filename) throws IOException {
+    public byte[] getFile(String filename) throws IOException {
         try(Stream<Path> stream = Files.walk(rootDir))
         {
             Optional<Path> file = stream.filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().equals(filename))
                     .findFirst();
             if(file.isPresent())
-                return file;
+                return Files.readAllBytes(file.get());
 
             throw new FileNotFoundException();
         }
