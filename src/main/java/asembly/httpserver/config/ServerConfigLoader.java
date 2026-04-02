@@ -22,7 +22,9 @@ public class ServerConfigLoader {
         String staticDir = props.getProperty("server.staticDir", "./public");
         boolean proxyEnabled = Boolean.parseBoolean(props.getProperty("proxy.enabled", "false"));
         String proxyUpstreams = props.getProperty("proxy.upstreams", "");
+        String listRoutes = props.getProperty("route", "");
         Map<String,InetSocketAddress> upstreams = new HashMap<>();
+        Map<String, String> routes = new HashMap<>();
 
         for(var item: proxyUpstreams.split(","))
         {
@@ -30,6 +32,15 @@ public class ServerConfigLoader {
             upstreams.put(url.getPath(),new InetSocketAddress(url.getHost(), url.getPort()));
         }
 
-        return new ServerConfig(host, port, threads, staticDir, proxyEnabled, upstreams, backlog);
+        String prefix = "route.";
+        for (String key : props.stringPropertyNames()) {
+            if (key.startsWith(prefix)) {
+                String route = key.substring(prefix.length());
+                String file = props.getProperty(key);
+                routes.put(route, file);
+            }
+        }
+
+        return new ServerConfig(host, port, threads, staticDir, proxyEnabled, upstreams, backlog, routes);
     }
 }

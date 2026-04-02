@@ -2,7 +2,7 @@ package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
 import asembly.httpserver.config.ServerConfigLoader;
-import asembly.httpserver.http.handler.InfoHandler;
+import asembly.httpserver.http.handler.StaticHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,10 @@ public class Main {
             log.info("The configuration file has been loaded.");
 
             HttpServer server = new HttpServer(config);
-            server.addHandler("GET", "/info", new InfoHandler());
+
+            for(var item: config.getRoutes().entrySet())
+                server.addHandler("GET", item.getKey(), new StaticHandler(item.getValue()));
+
             server.start();
 
         } catch (IOException e) {

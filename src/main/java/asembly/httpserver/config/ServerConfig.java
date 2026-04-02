@@ -11,10 +11,11 @@ public class ServerConfig {
     private final boolean proxyEnabled;
     private final int backlog;
     private final Map<String, InetSocketAddress> proxyUpstreams;
+    private final Map<String, String> routes;
 
     public ServerConfig(String host, int port, int threads,
                         String staticDir, boolean proxyEnabled, Map<String, InetSocketAddress> proxyUpstreams,
-                        int backlog) {
+                        int backlog, Map<String, String> routes) {
         this.host = host;
         this.port = port;
         this.threads = threads;
@@ -22,6 +23,7 @@ public class ServerConfig {
         this.proxyEnabled = proxyEnabled;
         this.proxyUpstreams = proxyUpstreams;
         this.backlog = backlog;
+        this.routes = routes;
     }
 
     public String getHost() { return host; }
@@ -32,4 +34,5 @@ public class ServerConfig {
     public boolean isProxyEnabled() { return proxyEnabled; }
     public Map<String, InetSocketAddress> getProxyUpstreams() { return proxyUpstreams; }
     public Map<String, InetSocketAddress> getAddressUpstreamFromRoute() { return proxyUpstreams; }
+    public Map<String, String> getRoutes() { return routes; }
 }
