@@ -1,5 +1,6 @@
-package asembly.httpserver.handler;
+package asembly.httpserver.connection;
 
+import asembly.httpserver.http.ResponseFabric;
 import asembly.httpserver.http.handler.Handler;
 import asembly.httpserver.model.RouteKey;
 import asembly.httpserver.http.io.RequestReader;
@@ -40,7 +41,7 @@ public class HttpSocketHandler extends ConnectionHandler{
                             request.getMethod(),
                             request.getPath()
                     ),
-                    (_)-> null
+                    (_)-> ResponseFabric.notFound()
             );
 
             var response = handler.handle(request);

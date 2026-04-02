@@ -1,4 +1,4 @@
-package asembly.httpserver.handler;
+package asembly.httpserver.connection;
 
 import asembly.httpserver.enums.StatusCode;
 import asembly.httpserver.http.Response;
