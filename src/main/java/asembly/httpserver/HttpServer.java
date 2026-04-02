@@ -1,8 +1,8 @@
 package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
-import asembly.httpserver.handler.Handler;
-import asembly.httpserver.handler.HttpSocketHandler;
+import asembly.httpserver.http.handler.Handler;
+import asembly.httpserver.connection.HttpSocketHandler;
 import asembly.httpserver.model.RouteKey;
 import asembly.httpserver.proxy.ProxySocketHandler;
 import org.slf4j.Logger;

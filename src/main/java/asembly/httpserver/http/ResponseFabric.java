@@ -15,13 +15,13 @@ public class ResponseFabric {
 
     public static Response notFound()
     {
-        var body = "not found".getBytes();
+        var body = "<h1>Resource not found</h1>".getBytes();
         return new Response.Builder()
                .body(body)
                .statusCode(404)
                .addHeader("Connection", "close")
                .addHeader("Content-Length", String.valueOf(body.length))
-               .addHeader("Content-Type", "application/json")
+               .addHeader("Content-Type", "text/html")
                .build();
     }
 

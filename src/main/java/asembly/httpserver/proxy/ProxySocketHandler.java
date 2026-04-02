@@ -1,8 +1,8 @@
 package asembly.httpserver.proxy;
 
 import asembly.httpserver.HttpServer;
-import asembly.httpserver.handler.ConnectionHandler;
-import asembly.httpserver.handler.Handler;
+import asembly.httpserver.connection.ConnectionHandler;
+import asembly.httpserver.http.handler.Handler;
 import asembly.httpserver.model.RouteKey;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.io.RequestReader;

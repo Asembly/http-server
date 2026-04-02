@@ -1,6 +1,6 @@
 package asembly.httpserver.proxy;
 
-import asembly.httpserver.handler.Handler;
+import asembly.httpserver.http.handler.Handler;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
 
