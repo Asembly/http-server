@@ -57,16 +57,29 @@ public class FileService {
         return paths;
     }
 
-    public byte[] getFile(String filename) throws IOException {
-        try(Stream<Path> stream = Files.walk(rootDir))
+    public byte[] getFile(String path) throws IOException {
+        var baseFilename = getBaseFilename(path);
+        try(Stream<Path> stream = Files.walk(Paths.get(rootDir + path)))
         {
             Optional<Path> file = stream.filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().equals(filename))
+                    .filter(p -> p.getFileName().toString().equals(baseFilename))
                     .findFirst();
             if(file.isPresent())
                 return Files.readAllBytes(file.get());
 
             throw new FileNotFoundException();
         }
+    }
+
+    private String getBaseFilename(String path)
+    {
+        StringBuilder baseFilename = new StringBuilder();
+        int i = path.length()-1;
+        while(i != path.lastIndexOf("/"))
+        {
+            baseFilename.append(path.charAt(i));
+            i--;
+        }
+        return baseFilename.reverse().toString();
     }
 }
