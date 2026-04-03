@@ -4,7 +4,7 @@ import asembly.httpserver.config.ServerConfig;
 import asembly.httpserver.http.handler.Handler;
 import asembly.httpserver.connection.HttpSocketHandler;
 import asembly.httpserver.model.RouteKey;
-import asembly.httpserver.proxy.ProxySocketHandler;
+import asembly.httpserver.connection.ProxySocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class HttpServer {
-
 
     private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
     private final InetAddress address;
@@ -56,7 +55,7 @@ public class HttpServer {
             while(true)
             {
                 Socket client = server.accept();
-                client.setSoTimeout(5000);
+                client.setSoTimeout(config.getSoTimeout());
 
                 Runnable task = config.isProxyEnabled()
                         ? new ProxySocketHandler(client, handlers)

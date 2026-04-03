@@ -10,15 +10,17 @@ public class ServerConfig {
     private final String staticDir;
     private final boolean proxyEnabled;
     private final int backlog;
+    private final int soTimeout;
     private final Map<String, InetSocketAddress> proxyUpstreams;
     private final Map<String, String> routes;
 
     public ServerConfig(String host, int port, int threads,
                         String staticDir, boolean proxyEnabled, Map<String, InetSocketAddress> proxyUpstreams,
-                        int backlog, Map<String, String> routes) {
+                        int backlog, Map<String, String> routes, int soTimeout) {
         this.host = host;
         this.port = port;
         this.threads = threads;
+        this.soTimeout = soTimeout;
         this.staticDir = staticDir;
         this.proxyEnabled = proxyEnabled;
         this.proxyUpstreams = proxyUpstreams;
@@ -30,6 +32,7 @@ public class ServerConfig {
     public int getPort() { return port; }
     public int getBacklog() { return backlog; };
     public int getThreads() { return threads; }
+    public int getSoTimeout() { return soTimeout; }
     public String getStaticDir() { return staticDir; }
     public boolean isProxyEnabled() { return proxyEnabled; }
     public Map<String, InetSocketAddress> getProxyUpstreams() { return proxyUpstreams; }
