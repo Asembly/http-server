@@ -2,14 +2,14 @@ package asembly.httpserver.cache;
 
 import asembly.httpserver.exception.ResourceNotFoundException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 public class LazyCache<K, V> implements Cache<K, V>{
 
     private final Function<K, V> function;
-    private final Map<K, V> cache = new HashMap<>();
+    private final ConcurrentMap<K, V> cache = new ConcurrentHashMap<>();
 
     public LazyCache(Function<K, V> function)
     {
