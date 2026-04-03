@@ -59,7 +59,7 @@ public class FileService {
     }
 
     public byte[] getFile(String path){
-        Path file = rootDir.resolve(getBaseFilename(path)).normalize();
+        Path file = Paths.get(rootDir + path).normalize();
 
         if (!Files.exists(file) || !Files.isRegularFile(file)) {
             throw new ResourceNotFoundException(path);
