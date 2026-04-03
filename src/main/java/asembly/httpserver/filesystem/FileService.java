@@ -1,18 +1,19 @@
-package asembly.httpserver.service;
+package asembly.httpserver.filesystem;
 
 import asembly.httpserver.HttpServer;
+import asembly.httpserver.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 public class FileService {
 
@@ -57,17 +58,17 @@ public class FileService {
         return paths;
     }
 
-    public byte[] getFile(String path) throws IOException {
-        var baseFilename = getBaseFilename(path);
-        try(Stream<Path> stream = Files.walk(Paths.get(rootDir + path)))
-        {
-            Optional<Path> file = stream.filter(Files::isRegularFile)
-                    .filter(p -> p.getFileName().toString().equals(baseFilename))
-                    .findFirst();
-            if(file.isPresent())
-                return Files.readAllBytes(file.get());
+    public byte[] getFile(String path){
+        Path file = rootDir.resolve(getBaseFilename(path)).normalize();
 
-            throw new FileNotFoundException();
+        if (!Files.exists(file) || !Files.isRegularFile(file)) {
+            throw new ResourceNotFoundException(path);
+        }
+
+        try {
+            return Files.readAllBytes(file);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
