@@ -1,15 +1,14 @@
 package asembly.httpserver.http.handler;
 
+import asembly.httpserver.cache.Cache;
+import asembly.httpserver.cache.LazyCache;
+import asembly.httpserver.filesystem.FileService;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
 import asembly.httpserver.http.ResponseFabric;
-import asembly.httpserver.parser.JsonBodyParser;
-import asembly.httpserver.parser.MultipartBodyParser;
-import asembly.httpserver.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -18,26 +17,21 @@ public class StaticHandler implements Handler{
     private static final Logger log = LoggerFactory.getLogger(StaticHandler.class);
 
     private final FileService fileService;
-    private final JsonBodyParser jsonParser;
-    private final MultipartBodyParser multipartParser;
     private final String filename;
+    private final Cache<String, byte[]> cache;
 
     public StaticHandler(String filename){
-        this.multipartParser = new MultipartBodyParser();
         this.fileService = new FileService();
-        this.jsonParser = new JsonBodyParser();
         this.filename = filename;
+        cache = new LazyCache<>(fileService::getFile);
     }
 
     @Override
     public Response handle(Request request) {
-        try{
-            return ResponseFabric.ok(fileService.getFile(filename), getContentType(Paths.get(filename)));
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
+        var cacheFile = cache.get(filename);
+        var contentType = getContentType(Paths.get(filename));
 
-        return ResponseFabric.notFound();
+        return ResponseFabric.ok(cacheFile, contentType);
     }
 
     private String getContentType(Path file) {
