@@ -1,6 +1,7 @@
 package asembly.httpserver.config;
 
-import java.net.InetSocketAddress;
+import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 public class ServerConfig {
@@ -11,11 +12,11 @@ public class ServerConfig {
     private final boolean proxyEnabled;
     private final int backlog;
     private final int soTimeout;
-    private final Map<String, InetSocketAddress> proxyUpstreams;
+    Map<String, List<URI>> upstreams;
     private final Map<String, String> routes;
 
     public ServerConfig(String host, int port, int threads,
-                        String staticDir, boolean proxyEnabled, Map<String, InetSocketAddress> proxyUpstreams,
+                        String staticDir, boolean proxyEnabled, Map<String, List<URI>> upstreams,
                         int backlog, Map<String, String> routes, int soTimeout) {
         this.host = host;
         this.port = port;
@@ -23,7 +24,7 @@ public class ServerConfig {
         this.soTimeout = soTimeout;
         this.staticDir = staticDir;
         this.proxyEnabled = proxyEnabled;
-        this.proxyUpstreams = proxyUpstreams;
+        this.upstreams = upstreams;
         this.backlog = backlog;
         this.routes = routes;
     }
@@ -35,7 +36,6 @@ public class ServerConfig {
     public int getSoTimeout() { return soTimeout; }
     public String getStaticDir() { return staticDir; }
     public boolean isProxyEnabled() { return proxyEnabled; }
-    public Map<String, InetSocketAddress> getProxyUpstreams() { return proxyUpstreams; }
-    public Map<String, InetSocketAddress> getAddressUpstreamFromRoute() { return proxyUpstreams; }
+    public Map<String, List<URI>> getProxyUpstreams() { return upstreams; }
     public Map<String, String> getRoutes() { return routes; }
 }

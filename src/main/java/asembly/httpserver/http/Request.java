@@ -55,6 +55,11 @@ public class Request extends HttpMessage{
         return params.getOrDefault(key, "");
     }
 
+    public Map<String, String> getParams()
+    {
+        return params;
+    }
+
     public static class Builder extends HttpMessage.Builder<Builder, HttpMessage>
     {
         private final Map<String, String> params = new HashMap<>();
@@ -79,7 +84,7 @@ public class Request extends HttpMessage{
             return this;
         }
 
-        public Builder addParam(Map<String, String> map)
+        public Builder addParams(Map<String, String> map)
         {
             this.params.putAll(map);
             return this;

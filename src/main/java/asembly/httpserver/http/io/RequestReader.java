@@ -29,7 +29,7 @@ public class RequestReader extends HttpReader{
         builder.method(startLine.getFirst());
         builder.path(path);
         builder.version(startLine.getLast());
-        builder.addParam(parser.parseParam(path));
+        builder.addParams(parser.parseParam(path));
 
         while(true) {
             String line = readLine(input);

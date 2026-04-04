@@ -31,6 +31,9 @@ public class StaticHandler implements Handler{
         var cacheFile = cache.get(filename);
         var contentType = getContentType(Paths.get(filename));
 
+        if(cacheFile.length == 0)
+            return ResponseFabric.notFound();
+
         return ResponseFabric.ok(cacheFile, contentType);
     }
 
