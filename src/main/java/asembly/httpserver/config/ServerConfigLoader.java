@@ -18,7 +18,6 @@ public class ServerConfigLoader {
         int threads = Integer.parseInt(props.getProperty("server.threads", "8"));
         int soTimeout = Integer.parseInt(props.getProperty("server.soTimeout", "5000"));
         String staticDir = props.getProperty("server.staticDir", "public");
-        String proxyDir = props.getProperty("server.proxyDir", "api");
         boolean proxyEnabled = Boolean.parseBoolean(props.getProperty("proxy.enabled", "false"));
         Map<String, List<URI>> upstreams = new HashMap<>();
         Map<String, String> routes = new HashMap<>();

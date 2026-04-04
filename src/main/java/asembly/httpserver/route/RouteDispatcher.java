@@ -2,7 +2,8 @@ package asembly.httpserver.route;
 
 import asembly.httpserver.HttpServer;
 import asembly.httpserver.connection.HttpSocketHandler;
-import asembly.httpserver.connection.ProxySocketHandler;
+import asembly.httpserver.proxy.ProxyService;
+import asembly.httpserver.proxy.ProxySocketHandler;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.handler.StaticHandler;
 
@@ -27,12 +28,12 @@ public class RouteDispatcher {
             router.addHandler("GET",  "/" + config.getStaticDir() + item.getKey(), new StaticHandler(item.getValue()));
     }
 
-    public void handle(Request request, Socket client)
+    public void handle(Request request, Socket client, ProxyService proxyService)
     {
 
         if(request.getPath().startsWith("/api/"))
         {
-            pool.submit(new ProxySocketHandler(request, client));
+            pool.submit(new ProxySocketHandler(request, client, proxyService));
         }
         else if(request.getPath().startsWith("/public/"))
         {

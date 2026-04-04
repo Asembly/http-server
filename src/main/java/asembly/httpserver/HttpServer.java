@@ -2,6 +2,7 @@ package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
 import asembly.httpserver.http.io.RequestReader;
+import asembly.httpserver.proxy.ProxyService;
 import asembly.httpserver.route.RouteDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ public class HttpServer {
     private final int backlog;
     private final RouteDispatcher dispatcher;
     private final RequestReader requestReader;
+    private final ProxyService proxyService;
 
     private static ServerConfig config;
 
@@ -30,6 +32,7 @@ public class HttpServer {
         this.port = config.getPort();
         this.address = InetAddress.getByName(config.getHost());
         this.dispatcher = new RouteDispatcher();
+        this.proxyService = new ProxyService(config);
     }
 
     public void start() throws IOException {
@@ -42,7 +45,7 @@ public class HttpServer {
                 Socket client = server.accept();
                 var request = requestReader.read(client.getInputStream());
                 client.setSoTimeout(config.getSoTimeout());
-                dispatcher.handle(request, client);
+                dispatcher.handle(request, client, proxyService);
             }
         }
     }
@@ -51,10 +54,4 @@ public class HttpServer {
     {
         return HttpServer.config;
     }
-
-    public void stop()
-    {
-    }
-
-
 }

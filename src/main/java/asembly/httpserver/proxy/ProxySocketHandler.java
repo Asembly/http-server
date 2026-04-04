@@ -1,6 +1,6 @@
-package asembly.httpserver.connection;
+package asembly.httpserver.proxy;
 
-import asembly.httpserver.HttpServer;
+import asembly.httpserver.connection.ConnectionHandler;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.ResponseFabric;
 import asembly.httpserver.http.io.ResponseReader;
@@ -22,11 +22,13 @@ public class ProxySocketHandler extends ConnectionHandler {
 
     private final Request request;
     private final ResponseReader responseReader;
+    private final ProxyService proxyService;
 
-    public ProxySocketHandler(Request request, Socket client) {
+    public ProxySocketHandler(Request request, Socket client, ProxyService proxyService) {
         this.client = client;
         this.request = request;
         this.responseReader = new ResponseReader();
+        this.proxyService = proxyService;
     }
 
     @Override
@@ -34,12 +36,9 @@ public class ProxySocketHandler extends ConnectionHandler {
 
         try (client; OutputStream output = client.getOutputStream())
         {
-
             log.info("Client connected {} {} {}", client.getInetAddress().getHostAddress(), request.getMethod(), request.getPath());
 
-            var upstreams = HttpServer.getConfig().getProxyUpstreams();
             var path = request.getPath();
-
 
             if(path.startsWith("/"))
                 path = path.substring(1);
@@ -62,14 +61,10 @@ public class ProxySocketHandler extends ConnectionHandler {
                     .addParams(request.getParams())
                     .build();
 
-            var routeUpstream = upstreams.get(serviceName);
-
-            // TODO сделать для начала стандартный балансировщик нагрузки,
-            //  чтобы сервер не брал первый элемент а
-            //  руководствовался выбором лучшего сервиса на данный момент
+            var routeUpstream = proxyService.getBalancer(serviceName).choose();
 
             if(routeUpstream != null)
-                proxy(upstreamRequest, output, routeUpstream.get(0));
+                proxy(upstreamRequest, output, routeUpstream);
             else
                 sendResponse(ResponseFabric.notFound(), output);
 
