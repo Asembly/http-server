@@ -2,111 +2,63 @@ package asembly.httpserver.http.io;
 
 import asembly.httpserver.entity.ClientState;
 import asembly.httpserver.enums.ParsingState;
-import asembly.httpserver.http.HttpParser;
+import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.http.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.nio.channels.*;
 
-public class RequestParser {
+public class RequestParser implements HttpParser {
 
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
-    private final RequestReader reader;
-    private final HttpParser parser;
+    private final HttpMessageParser parser;
 
     public RequestParser()
     {
-       this.reader = new RequestReader();
-       this.parser = new HttpParser();
+       this.parser = new HttpMessageParser(new RequestStartLineParser());
     }
 
-    public Request parse(ByteBuffer buffer, ClientState state)
-    {
-        try{
-            while(true) {
-                switch (state.getParsingState()) {
-                    case START_LINE: {
+    @Override
+    public void parse(SelectionKey key) throws IOException {
 
-                        byte[] lineBytes = reader.readLine(buffer);
+        SocketChannel client = (SocketChannel) key.channel();
+        ClientState state = (ClientState) key.attachment();
 
-                        if(lineBytes == null)
-                            throw new RequestParseException("Request line not completed");
+        ByteBuffer buffer = state.getInput();
+        try {
+            int n = client.read(buffer);
 
-                        String line = new String(lineBytes, StandardCharsets.UTF_8);
-                        var startLine = parser.parseStartLine(line);
+            if (n == -1)
+                throw new ClientCloseException();
 
-                        state.getStartLine().addAll(startLine);
-                        state.setParsingState(ParsingState.HEADERS);
-                        break;
-                    }
-                    case HEADERS: {
-                        byte[] lineBytes = reader.readLine(buffer);
+            buffer.flip();
 
-                        if(lineBytes == null)
-                            throw new RequestParseException("Request line not completed");
+            while (buffer.hasRemaining()) {
+                parser.parse(buffer, state);
+                if (ParsingState.FINISH.equals(state.getParsingState())) {
+                    var requestBuilder = new Request.Builder();
+                    requestBuilder.path(state.getStartLine().get(1));
+                    requestBuilder.version(state.getStartLine().getLast());
+                    requestBuilder.method(state.getStartLine().getFirst());
+                    requestBuilder.addHeaders(state.getHeaders());
+                    requestBuilder.body(state.getBody());
 
-                        String line = new String(lineBytes, StandardCharsets.UTF_8);
+                    var request = requestBuilder.build();
 
-
-                        if(line.isEmpty()) {
-                            int contentLength = Integer.parseInt(
-                                    state.getHeaders().getOrDefault("Content-Length", "0")
-                            );
-
-                            if (contentLength > 0) {
-                                state.setParsingState(ParsingState.BODY);
-                            } else {
-                                state.setParsingState(ParsingState.FINISH);
-                            }
-                            break;
-                        }
-
-                        var header = parser.parseHeader(line);
-                        state.addHeader(header);
-                        break;
-                    }
-                    case BODY: {
-                        long expected = Long.parseLong(
-                                state.getHeaders().getOrDefault("Content-Length", "0")
-                        );
-
-                        if (expected < 0 || expected > ClientState.MAX_BODY_SIZE) {
-                            throw new RequestParseException("Content-Length out of range");
-                        }
-
-                        int remaining = buffer.remaining();
-
-                        if(remaining >= expected)
-                        {
-                            byte[] bodyBytes = new byte[(int) expected];
-                            buffer.get(bodyBytes);
-                            state.setBody(bodyBytes);
-                            state.setParsingState(ParsingState.FINISH);
-                        }
-                        else {
-                            log.warn("Incomplete body: received {} of {} bytes", remaining, expected);
-                            throw new RequestParseException(
-                                    String.format("Incomplete body: received %d of %d bytes", remaining, expected)
-                            );
-                        }
-                    }
-                    case FINISH: {
-                        var requestBuilder = new Request.Builder();
-                        requestBuilder.path(state.getStartLine().get(1));
-                        requestBuilder.version(state.getStartLine().getLast());
-                        requestBuilder.method(state.getStartLine().getFirst());
-                        requestBuilder.addHeaders(state.getHeaders());
-                        requestBuilder.body(state.getBody());
-
-                        return requestBuilder.build();
-                    }
+                    state.setRequest(request);
+                    break;
                 }
             }
+
+            buffer.compact();
         }
-        catch (RequestParseException e){
-            return null;
+        catch (SocketException e)
+        {
+            throw new ClientCloseException();
         }
     }
 }

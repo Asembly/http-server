@@ -2,11 +2,10 @@ package asembly.httpserver.http.io;
 
 import java.nio.ByteBuffer;
 
-public class RequestReader implements HttpReader{
+public class LineReader{
 
     private final byte[] CRLF = "\r\n".getBytes();
 
-    @Override
     public byte[] readLine(ByteBuffer buffer) {
 
         int n = indexOf(buffer, CRLF);

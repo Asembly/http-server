@@ -1,16 +1,16 @@
 package asembly.httpserver.http.io;
 
+import asembly.httpserver.exception.HttpParseException;
 import asembly.httpserver.http.Response;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
-import java.util.List;
 
-public class ResponseReader implements HttpParser{
+public class ResponseParser implements HttpParser{
 
     private final Response.Builder builder;
 
-    public ResponseReader()
+    public ResponseParser()
     {
         this.builder = new Response.Builder();
     }
@@ -18,10 +18,5 @@ public class ResponseReader implements HttpParser{
     @Override
     public void parse(SelectionKey key) throws HttpParseException, IOException {
 
-    }
-
-    @Override
-    public List<String> parseStartLine(String line) {
-        return HttpParser.super.parseStartLine(line);
     }
 }
