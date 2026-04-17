@@ -1,4 +1,4 @@
-package asembly.httpserver.service;
+package asembly.httpserver.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String key) {

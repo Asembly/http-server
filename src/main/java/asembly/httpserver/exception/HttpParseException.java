@@ -1,6 +1,8 @@
-package asembly.httpserver.http.io;
+package asembly.httpserver.exception;
 
-public class HttpParseException extends Exception {
+import java.io.IOException;
+
+public class HttpParseException extends IOException {
     public HttpParseException(String message) {
         super(message);
     }

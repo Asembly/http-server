@@ -2,6 +2,9 @@ package asembly.httpserver.http;
 
 import asembly.httpserver.entity.ClientState;
 import asembly.httpserver.enums.ParsingState;
+import asembly.httpserver.exception.ClientCloseException;
+import asembly.httpserver.exception.HttpParseException;
+import asembly.httpserver.exception.IncompleteLineException;
 import asembly.httpserver.http.handler.RouteDispatcher;
 import asembly.httpserver.http.handler.proxy.ProxyService;
 import asembly.httpserver.http.io.RequestParser;
@@ -9,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
@@ -32,37 +34,35 @@ public class StateManager {
         SocketChannel client = (SocketChannel) key.channel();
         ClientState state = (ClientState) key.attachment();
 
-        ByteBuffer buffer = state.getInput();
+        try {
+            requestParser.parse(key);
 
-        int n = client.read(buffer);
+            var request = state.getRequest();
 
-        if (n == -1) {
+            if (request != null) {
+                dispatcher.handle(request, state, proxyService);
+
+                if (state.getResponse() == null)
+                    throw new IllegalStateException("Response is null");
+
+                var responseData = ResponseSerializer.toByteBuffer(state.getResponse());
+
+                state.setOutput(responseData);
+
+                key.interestOps(SelectionKey.OP_WRITE);
+            }
+        }
+        catch (IncompleteLineException e) {
+           key.interestOps(SelectionKey.OP_READ);
+        }
+        catch (ClientCloseException e)
+        {
             client.close();
             key.cancel();
-            return;
         }
-
-        buffer.flip();
-
-        var request = requestParser.parse(state.getInput(), state);
-
-        state.setRequest(request);
-
-        if (state.getRequest() != null) {
-            dispatcher.handle(request,state, proxyService);
-            var responseData = ResponseSerializer.toByteBuffer(state.getResponse());
-
-            state.setOutput(responseData);
-
-            var response = state.getResponse();
-
-            if(response == null)
-                throw new IllegalStateException("Handler returned null Response");
-
-            key.interestOps(SelectionKey.OP_WRITE);
+        catch (HttpParseException e) {
+            throw new RuntimeException(e);
         }
-
-        buffer.compact();
     }
 
     public void onWritable(SelectionKey key) throws IOException {

@@ -1,7 +1,7 @@
 package asembly.httpserver.exception;
 
-public class NotCompleteException extends HttpParseException {
-    public NotCompleteException(String message) {
-        super(message);
+public class IncompleteLineException extends HttpParseException {
+    public IncompleteLineException() {
+        super("Incomplete line");
     }
 }
