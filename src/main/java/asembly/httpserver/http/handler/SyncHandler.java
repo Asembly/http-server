@@ -4,7 +4,7 @@ import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
 
 @FunctionalInterface
-public interface Handler {
+public interface SyncHandler {
 
     Response handle(Request request);
 
