@@ -1,6 +1,6 @@
 package asembly.httpserver.cache;
 
-import asembly.httpserver.service.ResourceNotFoundException;
+import asembly.httpserver.exception.ResourceNotFoundException;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -17,14 +17,14 @@ public class LazyCache<K, V> implements Cache<K, V>{
     }
 
     @Override
-    public V get(K key){
+    public V get(K key) throws ResourceNotFoundException {
         var value = cache.get(key);
         if(value != null) return value;
 
         value = function.apply(key);
 
         if(value == null)
-           throw new ResourceNotFoundException(String.valueOf(key));
+           throw new ResourceNotFoundException();
 
         cache.put(key, value);
 

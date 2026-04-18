@@ -2,9 +2,11 @@ package asembly.httpserver.http.handler;
 
 import asembly.httpserver.cache.Cache;
 import asembly.httpserver.cache.LazyCache;
+import asembly.httpserver.exception.ResourceNotFoundException;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
-import asembly.httpserver.http.ResponseFabric;
+import asembly.httpserver.http.response.JsonResponseService;
+import asembly.httpserver.http.response.ResponseFabric;
 import asembly.httpserver.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,28 +15,34 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 
-public class StaticHandler implements Handler{
+public class StaticHandler implements SyncHandler {
     private static final Logger log = LoggerFactory.getLogger(StaticHandler.class);
 
     private final FileService fileService;
-    private final String filename;
     private final Cache<String, byte[]> cache;
 
-    public StaticHandler(String filename){
+    public StaticHandler(){
         this.fileService = new FileService();
-        this.filename = filename;
         cache = new LazyCache<>(fileService::getFile);
     }
 
     @Override
     public Response handle(Request request) {
-        var cacheFile = cache.get(filename);
-        var contentType = getContentType(Paths.get(filename));
 
-        if(cacheFile.length == 0)
-            return ResponseFabric.notFound();
+        var path = request.getPath();
+        var lastSlash = path.indexOf("/", 1);
+        var filename = path.substring(lastSlash+1);
 
-        return ResponseFabric.ok(cacheFile, contentType);
+        try{
+            var cacheFile = cache.get(filename);
+            var contentType = getContentType(Paths.get(filename));
+
+            return ResponseFabric.of(cacheFile, 200, contentType);
+        } catch (ResourceNotFoundException e) {
+            return JsonResponseService.notFound("Resource not found", request.getPath());
+        }
+
+
     }
 
     private String getContentType(Path file) {
