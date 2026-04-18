@@ -1,6 +1,7 @@
-package asembly.httpserver.http;
+package asembly.httpserver.http.response;
 
 import asembly.httpserver.enums.StatusCode;
+import asembly.httpserver.http.Response;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
