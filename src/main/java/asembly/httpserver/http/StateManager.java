@@ -6,8 +6,10 @@ import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.exception.HttpParseException;
 import asembly.httpserver.exception.IncompleteLineException;
 import asembly.httpserver.http.handler.RouteDispatcher;
-import asembly.httpserver.http.handler.proxy.ProxyService;
 import asembly.httpserver.http.io.RequestParser;
+import asembly.httpserver.http.response.JsonResponseService;
+import asembly.httpserver.http.response.ResponseSerializer;
+import asembly.httpserver.service.ProxyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +63,10 @@ public class StateManager {
             key.cancel();
         }
         catch (HttpParseException e) {
-            throw new RuntimeException(e);
+            var response = JsonResponseService.badRequest(e.getMessage(), null);
+            var responseData = ResponseSerializer.toByteBuffer(response);
+            state.setOutput(responseData);
+            key.interestOps(SelectionKey.OP_WRITE);
         }
     }
 
