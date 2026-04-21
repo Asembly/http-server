@@ -1,8 +1,11 @@
 package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
-import asembly.httpserver.entity.ClientState;
 import asembly.httpserver.http.StateManager;
+import asembly.httpserver.http.response.JsonResponseService;
+import asembly.httpserver.http.response.ResponseSerializer;
+import asembly.httpserver.state.ClientState;
+import asembly.httpserver.state.ProxyState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,14 +60,37 @@ public class HttpServer {
                         SocketChannel client = serverChannel.accept();
                         if (client != null) {
                             client.configureBlocking(false);
+                            log.info("Client connected: {}", client.getRemoteAddress());
                             client.register(selector, SelectionKey.OP_READ, new ClientState());
+                        }
+                    }
+                    else if (key.isConnectable())
+                    {
+                        SocketChannel upstream = (SocketChannel) key.channel();
+                        try {
+                            if (upstream.finishConnect()) {
+                                key.interestOps(SelectionKey.OP_WRITE);
+                            } else {
+                                key.interestOps(SelectionKey.OP_CONNECT);
+                            }
+                        } catch (IOException e) {
+                            ProxyState state = (ProxyState) key.attachment();
+
+                            SocketChannel client = state.getClient();
+                            ClientState clientState = state.getClientState();
+
+                            var response = JsonResponseService.badGateway(e.getMessage(),
+                                    clientState.getRequest().getPath());
+
+                            var responseData = ResponseSerializer.toByteBuffer(response);
+
+                            clientState.setOutput(responseData);
+                            client.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
                         }
                     }
                     else if (key.isReadable()) {
                         stateManager.onReadable(key);
-                    }
-                    else if(key.isWritable())
-                    {
+                    } else if (key.isWritable()) {
                         stateManager.onWritable(key);
                     }
                 }
