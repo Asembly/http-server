@@ -1,87 +1,47 @@
 package asembly.httpserver.http.handler.proxy;
 
 import asembly.httpserver.http.Request;
-import asembly.httpserver.http.RequestSerializer;
-import asembly.httpserver.http.Response;
-import asembly.httpserver.http.handler.Handler;
-import asembly.httpserver.http.io.ResponseReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import asembly.httpserver.http.handler.AsyncHandler;
+import asembly.httpserver.service.ProxyService;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.SelectionKey;
 import java.util.Arrays;
 
-public class ProxyHandler implements Handler {
-    private static final Logger log = LoggerFactory.getLogger(ProxyHandler.class);
-
-    private final Request request;
-    private final ResponseReader responseReader;
+public class ProxyHandler implements AsyncHandler {
     private final ProxyService proxyService;
 
-    public ProxyHandler(Request request, ProxyService proxyService) {
-        this.request = request;
-        this.responseReader = new ResponseReader();
+    public ProxyHandler(ProxyService proxyService) {
         this.proxyService = proxyService;
     }
 
-    // TODO доделать работу proxy
     @Override
-    public Response handle(Request request) {
+    public void handle(Request request, SelectionKey key) throws IOException {
+        var path = request.getPath();
 
-        try {
-            var path = request.getPath();
+        if (path.startsWith("/"))
+            path = path.substring(1);
 
-            if (path.startsWith("/"))
-                path = path.substring(1);
+        String[] parts = path.split("/");
 
-            String[] parts = path.split("/");
+        String serviceName = parts.length > 1 ? parts[1] : "";
 
-            String serviceName = parts.length > 1 ? parts[1] : "";
+        String routePath = parts.length > 2
+                ? "/" + String.join("/", Arrays.copyOfRange(parts, 2, parts.length))
+                : "/";
 
-            String routePath = parts.length > 2
-                    ? "/" + String.join("/", Arrays.copyOfRange(parts, 2, parts.length))
-                    : "/";
+        var upstreamRequest = new Request.Builder()
+                .addHeaders(request.getHeaders())
+                .method(request.getMethod())
+                .path(routePath)
+                .version(request.getVersion())
+                .boundary(request.getBoundary())
+                .body(request.getBody())
+                .addParams(request.getParams())
+                .build();
 
-            var upstreamRequest = new Request.Builder()
-                    .addHeaders(request.getHeaders())
-                    .method(request.getMethod())
-                    .path(routePath)
-                    .version(request.getVersion())
-                    .boundary(request.getBoundary())
-                    .body(request.getBody())
-                    .addParams(request.getParams())
-                    .build();
+        var routeUpstream = proxyService.getBalancer(serviceName).choose();
 
-            var routeUpstream = proxyService.getBalancer(serviceName).choose();
-
-            if (routeUpstream != null) {
-                InetSocketAddress upstreamAddress = new InetSocketAddress(routeUpstream.getHost(), routeUpstream.getPort());
-                var buffer = RequestSerializer.toByteBuffer(request);
-                proxy(buffer, upstreamAddress);
-            }
-//        else
-//            sendResponse(ResponseFabric.notFound(), output);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }
-
-    private void proxy(ByteBuffer buffer, InetSocketAddress upstreamAddress) throws IOException {
-        SocketChannel otherClient = SocketChannel.open();
-        otherClient.configureBlocking(false);
-        otherClient.connect(upstreamAddress);
-        otherClient.write(buffer);
-
-        if(buffer.hasRemaining())
-            return;
-
-
-
-        System.out.println("hello");
-
+        proxyService.proxy(upstreamRequest, routeUpstream, key);
     }
 }

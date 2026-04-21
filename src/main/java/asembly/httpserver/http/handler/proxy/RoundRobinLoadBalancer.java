@@ -20,6 +20,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer{
     public URI choose() {
 
         int i = Math.floorMod(index.getAndIncrement(), upstreams.size());
-        return upstreams.get(i);
+        URI uri = upstreams.get(i);
+        return uri;
     }
 }

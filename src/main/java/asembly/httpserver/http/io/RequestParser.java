@@ -1,32 +1,29 @@
 package asembly.httpserver.http.io;
 
-import asembly.httpserver.entity.ClientState;
 import asembly.httpserver.enums.ParsingState;
 import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.http.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import asembly.httpserver.state.ChannelState;
 
 import java.io.IOException;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
 
-public class RequestParser implements HttpParser {
+public class HttpParser {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
     private final HttpMessageParser parser;
 
-    public RequestParser()
+    public HttpParser(StartLineParser startLineParser)
     {
-       this.parser = new HttpMessageParser(new RequestStartLineParser());
+       this.parser = new HttpMessageParser(startLineParser);
     }
 
-    @Override
     public void parse(SelectionKey key) throws IOException {
 
         SocketChannel client = (SocketChannel) key.channel();
-        ClientState state = (ClientState) key.attachment();
+        ChannelState state = (ChannelState) key.attachment();
 
         ByteBuffer buffer = state.getInput();
         try {

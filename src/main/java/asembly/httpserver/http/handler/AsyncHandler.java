@@ -1,9 +1,11 @@
 package asembly.httpserver.http.handler;
 
 import asembly.httpserver.http.Request;
+import asembly.httpserver.http.Response;
 
-import java.nio.channels.SelectionKey;
+@FunctionalInterface
+public interface SyncHandler {
 
-public interface AsyncHandler {
-    void handle(Request request, SelectionKey clientKey);
+    Response handle(Request request);
+
 }

@@ -1,15 +1,18 @@
 package asembly.httpserver.http;
 
-import asembly.httpserver.entity.ClientState;
 import asembly.httpserver.enums.ParsingState;
+import asembly.httpserver.exception.BalancerNotFoundException;
 import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.exception.HttpParseException;
 import asembly.httpserver.exception.IncompleteLineException;
 import asembly.httpserver.http.handler.RouteDispatcher;
 import asembly.httpserver.http.io.RequestParser;
+import asembly.httpserver.http.io.ResponseParser;
 import asembly.httpserver.http.response.JsonResponseService;
 import asembly.httpserver.http.response.ResponseSerializer;
-import asembly.httpserver.service.ProxyService;
+import asembly.httpserver.state.ChannelState;
+import asembly.httpserver.state.ClientState;
+import asembly.httpserver.state.ProxyState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,36 +25,67 @@ public class StateManager {
     private static final Logger log = LoggerFactory.getLogger(StateManager.class);
 
     private final RequestParser requestParser;
+    private final ResponseParser responseParser;
     private final RouteDispatcher dispatcher;
-    private final ProxyService proxyService;
 
     public StateManager()
     {
         this.requestParser = new RequestParser();
+        this.responseParser = new ResponseParser();
         this.dispatcher = new RouteDispatcher();
-        this.proxyService = new ProxyService();
     }
 
     public void onReadable(SelectionKey key) throws IOException {
+
         SocketChannel client = (SocketChannel) key.channel();
-        ClientState state = (ClientState) key.attachment();
+        ChannelState state = (ChannelState) key.attachment();
 
         try {
-            requestParser.parse(key);
+            if(key.attachment() instanceof ClientState)
+            {
 
-            var request = state.getRequest();
+                requestParser.parse(key);
+                var request = state.getRequest();
+                if (request != null) {
+                    dispatcher.handle(request, (ClientState) state, key);
 
-            if (request != null) {
-                dispatcher.handle(request, state, proxyService);
+                    if (state.getResponse() != null)
+                    {
+                        var responseData = ResponseSerializer.toByteBuffer(state.getResponse());
 
-                if (state.getResponse() == null)
-                    throw new IllegalStateException("Response is null");
+                        state.setOutput(responseData);
 
-                var responseData = ResponseSerializer.toByteBuffer(state.getResponse());
+                        key.interestOps(SelectionKey.OP_WRITE);
+                    }
+                    else
+                    {
+                        key.interestOps(SelectionKey.OP_READ);
+                    }
+                }
+            }
+            else if(key.attachment() instanceof ProxyState)
+            {
 
-                state.setOutput(responseData);
+                SocketChannel upstream = (SocketChannel) key.channel();
+                var upstreamState = (ProxyState) state;
 
-                key.interestOps(SelectionKey.OP_WRITE);
+                responseParser.parse(key);
+
+                var response = upstreamState.getResponse();
+
+                if (response != null) {
+                    SelectionKey clientKey = upstreamState.getClient().keyFor(key.selector());
+
+                    var responseData = ResponseSerializer.toByteBuffer(response);
+
+                    upstreamState.getClientState().setOutput(responseData);
+
+                    if (clientKey != null && clientKey.isValid())
+                        clientKey.interestOps(SelectionKey.OP_WRITE);
+                }
+
+                key.cancel();
+                upstream.close();
             }
         }
         catch (IncompleteLineException e) {
@@ -62,8 +96,9 @@ public class StateManager {
             client.close();
             key.cancel();
         }
-        catch (HttpParseException e) {
-            var response = JsonResponseService.badRequest(e.getMessage(), null);
+        catch (HttpParseException | BalancerNotFoundException e) {
+            var path = state.getRequest() == null ? null : state.getRequest().getPath();
+            var response = JsonResponseService.badRequest(e.getMessage(), path);
             var responseData = ResponseSerializer.toByteBuffer(response);
             state.setOutput(responseData);
             key.interestOps(SelectionKey.OP_WRITE);
@@ -73,10 +108,14 @@ public class StateManager {
     public void onWritable(SelectionKey key) throws IOException {
 
         SocketChannel client = (SocketChannel) key.channel();
-        ClientState state = (ClientState) key.attachment();
+        ChannelState state = (ChannelState) key.attachment();
         var output = state.getOutput();
 
-        client.write(output);
+        try{
+            client.write(output);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
 
         if(output.hasRemaining())
         {
@@ -88,14 +127,18 @@ public class StateManager {
         }
     }
 
-    private void refreshState(ClientState state)
+    private void refreshState(ChannelState state)
     {
         state.setResponse(null);
         state.setRequest(null);
         state.setBody(null);
         state.setOutput(null);
 
-        state.getInput().clear();
+        if(state.getInput() != null)
+            state.getInput().clear();
+        if(state.getOutput() != null)
+            state.getOutput().clear();
+
         state.getStartLine().clear();
         state.setParsingState(ParsingState.START_LINE);
         state.getHeaders().clear();
