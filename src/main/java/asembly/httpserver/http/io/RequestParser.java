@@ -11,13 +11,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-public class HttpParser {
+public class RequestParser implements HttpParser{
 
     private final HttpMessageParser parser;
 
-    public HttpParser(StartLineParser startLineParser)
+    public RequestParser()
     {
-       this.parser = new HttpMessageParser(startLineParser);
+       this.parser = new HttpMessageParser(new RequestStartLineParser());
     }
 
     public void parse(SelectionKey key) throws IOException {

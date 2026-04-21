@@ -1,9 +1,10 @@
 package asembly.httpserver.http.io;
 
-import asembly.httpserver.entity.ClientState;
 import asembly.httpserver.enums.ParsingState;
 import asembly.httpserver.exception.HttpParseException;
 import asembly.httpserver.exception.IncompleteLineException;
+import asembly.httpserver.state.ChannelState;
+import asembly.httpserver.state.ClientState;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +21,7 @@ public class HttpMessageParser{
         lineReader = new LineReader();
     }
 
-    public void parse(ByteBuffer buffer, ClientState state) throws HttpParseException{
+    public void parse(ByteBuffer buffer, ChannelState state) throws HttpParseException{
 
         if (state.getParsingState() == ParsingState.START_LINE) {
             parseStartLine(buffer, state, startLineParser);
@@ -35,7 +36,7 @@ public class HttpMessageParser{
         }
     }
 
-    private void parseStartLine(ByteBuffer buffer, ClientState state, StartLineParser startLineParser) throws HttpParseException
+    private void parseStartLine(ByteBuffer buffer, ChannelState state, StartLineParser startLineParser) throws HttpParseException
     {
         byte[] lineBytes = lineReader.readLine(buffer);
         if (lineBytes == null) {
@@ -49,7 +50,7 @@ public class HttpMessageParser{
         state.setParsingState(ParsingState.HEADERS);
     }
 
-    private void parseHeaders(ByteBuffer buffer, ClientState state) throws HttpParseException
+    private void parseHeaders(ByteBuffer buffer, ChannelState state) throws HttpParseException
     {
         byte[] lineBytes = lineReader.readLine(buffer);
 
@@ -76,7 +77,7 @@ public class HttpMessageParser{
         }
     }
 
-    private void parseBody(ByteBuffer buffer, ClientState state) throws HttpParseException {
+    private void parseBody(ByteBuffer buffer, ChannelState state) throws HttpParseException {
 
         long expected = Long.parseLong(
                 state.getHeaders().getOrDefault("Content-Length", "0")
@@ -103,7 +104,7 @@ public class HttpMessageParser{
     private Map.Entry<String,String> parseHeader(String line) throws HttpParseException {
         int idx = line.indexOf(':');
         if (idx <= 0) {
-            throw new HttpParseException("Invalid header: " + line);
+            throw new HttpParseException("Invalid header");
         }
         String name = line.substring(0, idx).trim();
         String value = line.substring(idx + 1).trim();

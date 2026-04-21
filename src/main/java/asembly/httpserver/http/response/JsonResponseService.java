@@ -27,6 +27,12 @@ public class JsonResponseService {
         return toJson(dto, 403);
     }
 
+    public static Response badGateway(String message, String path)
+    {
+        HttpError dto = new HttpError(502, "BAD_GATEWAY", message, path);
+        return toJson(dto, 502);
+    }
+
     public static Response badRequest(String message, String path)
     {
         HttpError dto = new HttpError(400, "BAD_REQUEST", message, path);

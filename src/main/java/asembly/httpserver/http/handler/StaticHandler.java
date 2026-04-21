@@ -28,7 +28,6 @@ public class StaticHandler implements SyncHandler {
 
     @Override
     public Response handle(Request request) {
-
         var path = request.getPath();
         var lastSlash = path.indexOf("/", 1);
         var filename = path.substring(lastSlash+1);
