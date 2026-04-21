@@ -1,11 +1,13 @@
 package asembly.httpserver.http.handler;
 
 import asembly.httpserver.http.Request;
-import asembly.httpserver.http.Response;
+
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
 
 @FunctionalInterface
-public interface SyncHandler {
+public interface AsyncHandler {
 
-    Response handle(Request request);
+    void handle(Request request, SelectionKey clientKey) throws IOException;
 
 }
