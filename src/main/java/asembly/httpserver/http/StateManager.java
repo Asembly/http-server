@@ -1,6 +1,5 @@
 package asembly.httpserver.http;
 
-import asembly.httpserver.enums.ParsingState;
 import asembly.httpserver.exception.BalancerNotFoundException;
 import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.exception.HttpParseException;
@@ -43,7 +42,6 @@ public class StateManager {
         try {
             if(key.attachment() instanceof ClientState)
             {
-
                 requestParser.parse(key);
                 var request = state.getRequest();
                 if (request != null) {
@@ -105,7 +103,7 @@ public class StateManager {
         }
     }
 
-    public void onWritable(SelectionKey key) throws IOException {
+    public void onWritable(SelectionKey key) {
 
         SocketChannel client = (SocketChannel) key.channel();
         ChannelState state = (ChannelState) key.attachment();
@@ -122,26 +120,10 @@ public class StateManager {
             key.interestOps(SelectionKey.OP_WRITE);
         }
         else {
-            refreshState(state);
+            state.reset();
             key.interestOps(SelectionKey.OP_READ);
         }
     }
 
-    private void refreshState(ChannelState state)
-    {
-        state.setResponse(null);
-        state.setRequest(null);
-        state.setBody(null);
-        state.setOutput(null);
-
-        if(state.getInput() != null)
-            state.getInput().clear();
-        if(state.getOutput() != null)
-            state.getOutput().clear();
-
-        state.getStartLine().clear();
-        state.setParsingState(ParsingState.START_LINE);
-        state.getHeaders().clear();
-    }
 
 }
