@@ -22,12 +22,13 @@ import java.util.Iterator;
 public class HttpServer {
 
     private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
-    private final InetAddress address;
-    private final int port;
-
-    private final StateManager stateManager;
 
     public static ServerConfig config;
+
+    private final InetAddress address;
+    private final StateManager stateManager;
+
+    private final int port;
 
     public HttpServer(ServerConfig config) throws UnknownHostException {
         this.config = config;

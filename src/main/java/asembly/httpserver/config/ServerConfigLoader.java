@@ -14,7 +14,6 @@ public class ServerConfigLoader {
 
         String host = props.getProperty("server.host", "0.0.0.0");
         int port = Integer.parseInt(props.getProperty("server.port", "8080"));
-        int backlog = Integer.parseInt(props.getProperty("server.backlog", "1"));
         int threads = Integer.parseInt(props.getProperty("server.threads", "8"));
         int soTimeout = Integer.parseInt(props.getProperty("server.soTimeout", "5000"));
         String staticDir = props.getProperty("server.staticDir", "public");
@@ -46,6 +45,6 @@ public class ServerConfigLoader {
             }
         }
 
-        return new ServerConfig(host, port, threads, staticDir, proxyEnabled, upstreams, backlog, routes, soTimeout);
+        return new ServerConfig(host, port, threads, staticDir, proxyEnabled, upstreams, routes, soTimeout);
     }
 }
