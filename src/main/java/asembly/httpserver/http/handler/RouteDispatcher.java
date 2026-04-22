@@ -20,6 +20,7 @@ public class RouteDispatcher {
         router.addHandler("GET",  "/" + HttpServer.config.getStaticDir(), new StaticHandler());
         router.addHandler("GET",  "/favicon.ico", new StaticHandler());
         router.addHandler("GET", "/api", new ProxyHandler(proxyService));
+        router.addHandler("POST", "/api", new ProxyHandler(proxyService));
     }
 
     public void handle(Request request, ClientState state, SelectionKey key) throws IOException {
