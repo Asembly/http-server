@@ -66,27 +66,7 @@ public class HttpServer {
                     }
                     else if (key.isConnectable())
                     {
-                        SocketChannel upstream = (SocketChannel) key.channel();
-                        try {
-                            if (upstream.finishConnect()) {
-                                key.interestOps(SelectionKey.OP_WRITE);
-                            } else {
-                                key.interestOps(SelectionKey.OP_CONNECT);
-                            }
-                        } catch (IOException e) {
-                            ProxyState state = (ProxyState) key.attachment();
-
-                            SocketChannel client = state.getClient();
-                            ClientState clientState = state.getClientState();
-
-                            var response = JsonResponseService.badGateway(e.getMessage(),
-                                    clientState.getRequest().getPath());
-
-                            var responseData = ResponseSerializer.toByteBuffer(response);
-
-                            clientState.setOutput(responseData);
-                            client.keyFor(selector).interestOps(SelectionKey.OP_WRITE);
-                        }
+                        isConnectable(key);
                     }
                     else if (key.isReadable()) {
                         stateManager.onReadable(key);
@@ -97,4 +77,30 @@ public class HttpServer {
             }
         }
     }
+
+    private void isConnectable(SelectionKey key)
+    {
+        SocketChannel upstream = (SocketChannel) key.channel();
+        try {
+            if (upstream.finishConnect()) {
+                key.interestOps(SelectionKey.OP_WRITE);
+            } else {
+                key.interestOps(SelectionKey.OP_CONNECT);
+            }
+        } catch (IOException e) {
+            ProxyState state = (ProxyState) key.attachment();
+
+            SocketChannel client = state.getClient();
+            ClientState clientState = state.getClientState();
+
+            var response = JsonResponseService.badGateway(e.getMessage(),
+                    clientState.getRequest().getPath());
+
+            var responseData = ResponseSerializer.toByteBuffer(response);
+
+            clientState.setOutput(responseData);
+            client.keyFor(key.selector()).interestOps(SelectionKey.OP_WRITE);
+        }
+    }
+
 }
