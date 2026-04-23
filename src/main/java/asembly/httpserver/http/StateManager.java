@@ -9,7 +9,6 @@ import asembly.httpserver.http.io.RequestParser;
 import asembly.httpserver.http.io.ResponseParser;
 import asembly.httpserver.http.response.JsonResponseService;
 import asembly.httpserver.http.response.ResponseSerializer;
-import asembly.httpserver.state.ChannelState;
 import asembly.httpserver.state.ClientState;
 import asembly.httpserver.state.ProxyState;
 import org.slf4j.Logger;
@@ -37,7 +36,7 @@ public class StateManager {
     public void onReadable(SelectionKey key) throws IOException {
 
         SocketChannel client = (SocketChannel) key.channel();
-        ChannelState state = (ChannelState) key.attachment();
+        ClientState state = (ClientState) key.attachment();
 
         try {
             if(key.attachment() instanceof ClientState)
@@ -114,7 +113,7 @@ public class StateManager {
     public void onWritable(SelectionKey key) {
 
         SocketChannel client = (SocketChannel) key.channel();
-        ChannelState state = (ChannelState) key.attachment();
+        ClientState state = (ClientState) key.attachment();
         var output = state.getOutput();
 
         try{
