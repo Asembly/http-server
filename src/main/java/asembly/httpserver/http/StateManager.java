@@ -100,6 +100,14 @@ public class StateManager {
             var responseData = ResponseSerializer.toByteBuffer(response);
             state.setOutput(responseData);
             key.interestOps(SelectionKey.OP_WRITE);
+        } catch (IOException e) {
+            log.warn("Read failed, closing channel {}: {}", client, e.getMessage());
+            key.cancel();
+            try {
+                client.close();
+            } catch (IOException ex) {
+                log.debug("Error closing client after read failure", ex);
+            }
         }
     }
 

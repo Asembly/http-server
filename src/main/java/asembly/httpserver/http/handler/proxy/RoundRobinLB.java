@@ -4,12 +4,12 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RoundRobinLoadBalancer implements LoadBalancer{
+public class RoundRobinLB implements LoadBalancer{
 
     private final List<URI> upstreams;
     private final AtomicInteger index = new AtomicInteger(0);
 
-    public RoundRobinLoadBalancer(List<URI> upstreams)
+    public RoundRobinLB(List<URI> upstreams)
     {
         if(upstreams == null || upstreams.isEmpty())
             throw new IllegalArgumentException("Upstreams list cannot be null or empty");

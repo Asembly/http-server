@@ -5,7 +5,7 @@ import asembly.httpserver.exception.BalancerNotFoundException;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.RequestSerializer;
 import asembly.httpserver.http.handler.proxy.LoadBalancer;
-import asembly.httpserver.http.handler.proxy.RoundRobinLoadBalancer;
+import asembly.httpserver.http.handler.proxy.RoundRobinLB;
 import asembly.httpserver.state.ClientState;
 import asembly.httpserver.state.ProxyState;
 
@@ -24,7 +24,7 @@ public class ProxyService {
     public ProxyService()
     {
         for(var item: HttpServer.config.getProxyUpstreams().entrySet())
-            balancers.put(item.getKey(), new RoundRobinLoadBalancer(item.getValue()));
+            balancers.put(item.getKey(), new RoundRobinLB(item.getValue()));
     }
 
     public LoadBalancer getBalancer(String serviceName) throws BalancerNotFoundException {

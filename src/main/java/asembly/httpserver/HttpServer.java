@@ -1,11 +1,6 @@
 package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
-import asembly.httpserver.http.StateManager;
-import asembly.httpserver.http.response.JsonResponseService;
-import asembly.httpserver.http.response.ResponseSerializer;
-import asembly.httpserver.state.ClientState;
-import asembly.httpserver.state.ProxyState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,16 +12,19 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class HttpServer {
 
     private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
 
     public static ServerConfig config;
+    private static int idx = 0;
 
     private final InetAddress address;
-    private final StateManager stateManager;
+    private final List<SelectorWorker> workers;
 
     private final int port;
 
@@ -34,10 +32,16 @@ public class HttpServer {
         this.config = config;
         this.port = config.getPort();
         this.address = InetAddress.getByName(config.getHost());
-        this.stateManager = new StateManager();
+        this.workers = new ArrayList<>();
     }
 
     public void start() throws IOException {
+
+        int n = config.getThreads();
+        for (int i = 0; i < n; i++) {
+            SelectorWorker w = new SelectorWorker("worker - " + i);
+            workers.add(w);
+        }
 
         try (var server = ServerSocketChannel.open()) {
             log.info("Server started {}:{}", address.getHostAddress(), port);
@@ -48,60 +52,27 @@ public class HttpServer {
             server.bind(new InetSocketAddress(config.getHost(), config.getPort()));
             server.register(selector, SelectionKey.OP_ACCEPT);
 
-            while (true) {
+            while(true)
+            {
                 selector.select();
-
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+
                 while (it.hasNext()) {
                     SelectionKey key = it.next();
                     it.remove();
 
-                    if (key.isAcceptable()) {
+                    if(key.isAcceptable())
+                    {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                         SocketChannel client = serverChannel.accept();
                         if (client != null) {
-                            client.configureBlocking(false);
-                            log.info("Client connected: {}", client.getRemoteAddress());
-                            client.register(selector, SelectionKey.OP_READ, new ClientState());
+                            SelectorWorker w = workers.get(idx);
+                            idx = (idx + 1) % workers.size();
+                            w.register(client);
                         }
-                    }
-                    else if (key.isConnectable())
-                    {
-                        isConnectable(key);
-                    }
-                    else if (key.isReadable()) {
-                        stateManager.onReadable(key);
-                    } else if (key.isWritable()) {
-                        stateManager.onWritable(key);
                     }
                 }
             }
         }
     }
-
-    private void isConnectable(SelectionKey key)
-    {
-        SocketChannel upstream = (SocketChannel) key.channel();
-        try {
-            if (upstream.finishConnect()) {
-                key.interestOps(SelectionKey.OP_WRITE);
-            } else {
-                key.interestOps(SelectionKey.OP_CONNECT);
-            }
-        } catch (IOException e) {
-            ProxyState state = (ProxyState) key.attachment();
-
-            SocketChannel client = state.getClient();
-            ClientState clientState = state.getClientState();
-
-            var response = JsonResponseService.badGateway(e.getMessage(),
-                    clientState.getRequest().getPath());
-
-            var responseData = ResponseSerializer.toByteBuffer(response);
-
-            clientState.setOutput(responseData);
-            client.keyFor(key.selector()).interestOps(SelectionKey.OP_WRITE);
-        }
-    }
-
 }
