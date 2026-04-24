@@ -32,8 +32,8 @@ public class SelectorWorker {
         channel.configureBlocking(false);
         log.info("Client connected: {}", channel.getRemoteAddress());
         log.info("Current worker: {}",thread.getName());
-        selector.wakeup();
         channel.register(selector, SelectionKey.OP_READ, new ClientState());
+        selector.wakeup();
     }
 
     public void run(){

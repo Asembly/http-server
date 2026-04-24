@@ -69,9 +69,9 @@ public class HttpServer {
                         ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                         SocketChannel client = serverChannel.accept();
                         if (client != null) {
-                            SelectorWorker w = workers.get(idx);
+                            var worker = workers.get(idx);
                             idx = (idx + 1) % workers.size();
-                            w.register(client);
+                            worker.register(client);
                         }
                     }
                 }
