@@ -21,11 +21,11 @@ public class SelectorWorker {
     private final Selector selector;
     private final StateManager stateManager;
 
-    public SelectorWorker(String name) throws IOException {
+    public SelectorWorker(String name, StateManager stateManager) throws IOException {
         this.thread = new Thread(this::run, name);
         this.selector = Selector.open();
         this.thread.start();
-        this.stateManager = new StateManager();
+        this.stateManager = stateManager;
     }
 
     public void register(SocketChannel channel) throws IOException {
@@ -56,7 +56,8 @@ public class SelectorWorker {
                     }
                 }
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             log.error(e.getMessage());
             log.error("StackTrace: {}", e.getStackTrace());
         }

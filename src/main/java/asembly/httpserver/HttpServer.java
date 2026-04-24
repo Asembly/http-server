@@ -1,6 +1,7 @@
 package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
+import asembly.httpserver.http.StateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +26,7 @@ public class HttpServer {
 
     private final InetAddress address;
     private final List<SelectorWorker> workers;
+    private final StateManager stateManager;
 
     private final int port;
 
@@ -33,13 +35,14 @@ public class HttpServer {
         this.port = config.getPort();
         this.address = InetAddress.getByName(config.getHost());
         this.workers = new ArrayList<>();
+        this.stateManager = new StateManager();
     }
 
     public void start() throws IOException {
 
         int n = config.getThreads();
         for (int i = 0; i < n; i++) {
-            SelectorWorker w = new SelectorWorker("worker - " + i);
+            SelectorWorker w = new SelectorWorker("worker - " + i, stateManager);
             workers.add(w);
         }
 

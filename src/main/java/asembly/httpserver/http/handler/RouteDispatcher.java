@@ -17,10 +17,12 @@ public class RouteDispatcher {
 
     public RouteDispatcher()
     {
-        router.addHandler("GET",  "/" + HttpServer.config.getStaticDir(), new StaticHandler());
-        router.addHandler("GET",  "/favicon.ico", new StaticHandler());
-        router.addHandler("GET", "/api", new ProxyHandler(proxyService));
-        router.addHandler("POST", "/api", new ProxyHandler(proxyService));
+        var staticHandler = new StaticHandler();
+        var proxyHandler = new ProxyHandler(proxyService);
+        router.addHandler("GET",  "/" + HttpServer.config.getStaticDir(), staticHandler);
+        router.addHandler("GET",  "/favicon.ico", staticHandler);
+        router.addHandler("GET", "/api", proxyHandler);
+        router.addHandler("POST", "/api", proxyHandler);
     }
 
     public void handle(Request request, ClientState state, SelectionKey key) throws IOException {
