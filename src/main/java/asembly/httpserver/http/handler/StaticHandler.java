@@ -1,7 +1,7 @@
 package asembly.httpserver.http.handler;
 
 import asembly.httpserver.cache.Cache;
-import asembly.httpserver.cache.LazyCache;
+import asembly.httpserver.cache.FileCache;
 import asembly.httpserver.exception.ResourceNotFoundException;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
@@ -23,7 +23,7 @@ public class StaticHandler implements SyncHandler {
 
     public StaticHandler(){
         this.fileService = new FileService();
-        cache = new LazyCache<>(fileService::getFile);
+        cache = new FileCache(fileService);
     }
 
     @Override
@@ -54,6 +54,7 @@ public class StaticHandler implements SyncHandler {
         if (name.endsWith(".ico"))  return "image/x-icon";
         if (name.endsWith(".html"))  return "text/html";
         if (name.endsWith(".mp4"))  return "video/mp4";
+        if (name.endsWith(".mp3"))  return "audio/mpeg";
 
         return "application/octet-stream";
     }
