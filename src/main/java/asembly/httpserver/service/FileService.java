@@ -7,10 +7,9 @@ import org.slf4j.LoggerFactory;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +68,31 @@ public class FileService {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    public long getSizeFile(String path) throws IOException {
+        Path file = Paths.get(rootDir + "/" + path).normalize();
+        return Files.size(file);
+    }
+
+    public long transferTo(SocketChannel channel) throws IOException {
+        FileChannel fileChannel = FileChannel.open(Path.of("test.png"), StandardOpenOption.READ);
+        long position = 0;
+        long size = 100;
+
+        long transferred = fileChannel.transferTo(position, size - position, channel);
+
+        if(transferred > 0)
+            position += transferred;
+
+        return transferred;
+    }
+
+    public String strip(String path, int index, char symbol)
+    {
+       if(path.charAt(index) == symbol)
+           path = path.substring(1);
+       return path;
     }
 
     private String getBaseFilename(String path)

@@ -1,10 +1,10 @@
 package asembly.httpserver.cache;
 
-import asembly.httpserver.exception.ResourceNotFoundException;
+import java.io.IOException;
 
 public interface Cache<K, V> {
 
-    V get(K key) throws ResourceNotFoundException;
+    V get(K key) throws IOException;
     void put(K key, V value);
 
 }

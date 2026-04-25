@@ -1,10 +1,13 @@
 package asembly.httpserver.cache;
 
+import asembly.httpserver.exception.ResourceMaxSizeException;
 import asembly.httpserver.exception.ResourceNotFoundException;
 import asembly.httpserver.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -30,32 +33,36 @@ public class FileCache implements Cache<String, byte[]>{
     }
 
     @Override
-    public byte[] get(String key) throws ResourceNotFoundException {
+    public byte[] get(String key) throws IOException {
         var value = cache.get(key);
-        if(value != null) return value;
 
-        value = fileService.getFile(key);
+        if(value != null) {
+            return value;
+        }
 
-        int fileSize = value.length;
+        try{
+            var fileSize = fileService.getSizeFile(key);
+            if(fileSize > MAX_FILE_SIZE)
+            {
+                log.debug("File is more bigger than max file size!");
+                throw new ResourceMaxSizeException();
+            }
+            else if(totalCacheSize > MAX_TOTAL_CACHE)
+            {
+                log.debug("Cache is full loaded!");
+                return fileService.getFile(key);
+            }
 
-        if(value == null)
-        {
-            log.debug("File is not found!");
-            throw new ResourceNotFoundException();
-        }
-        else if(fileSize > MAX_FILE_SIZE)
-        {
-            log.debug("File is more bigger than max file size!");
-        }
-        else if(totalCacheSize > MAX_TOTAL_CACHE)
-        {
-            log.debug("Cache is full loaded!");
-        }
-        else
-        {
+            value = fileService.getFile(key);
+
+            if(value == null)
+                throw new ResourceNotFoundException();
+
             log.debug("File put to cache with size: {} kB", fileSize / 1024);
             cache.put(key, value);
             totalCacheSize += fileSize;
+        } catch (NoSuchFileException e) {
+            throw new ResourceNotFoundException();
         }
 
         return value;

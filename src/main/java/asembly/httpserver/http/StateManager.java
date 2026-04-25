@@ -10,6 +10,7 @@ import asembly.httpserver.http.io.ResponseParser;
 import asembly.httpserver.http.response.JsonResponseService;
 import asembly.httpserver.http.response.ResponseSerializer;
 import asembly.httpserver.state.ClientState;
+import asembly.httpserver.state.FileTransferState;
 import asembly.httpserver.state.ProxyState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,19 +70,6 @@ public class StateManager {
                 var request = state.getRequest();
                 if (request != null) {
                     dispatcher.handle(request, (ClientState) state, key);
-
-                    if (state.getResponse() != null)
-                    {
-                        var responseData = ResponseSerializer.toByteBuffer(state.getResponse());
-
-                        state.setOutput(responseData);
-
-                        key.interestOps(SelectionKey.OP_WRITE);
-                    }
-                    else
-                    {
-                        key.interestOps(SelectionKey.OP_READ);
-                    }
                 }
             }
         }
@@ -118,7 +106,36 @@ public class StateManager {
         var output = state.getOutput();
 
         try{
+
             client.write(output);
+            if(output.hasRemaining())
+            {
+                key.interestOps(SelectionKey.OP_WRITE);
+                return;
+            }
+
+            FileTransferState fs = state.getFileState();
+            if(fs != null)
+            {
+                var transferred = fs.transferTo(client);
+                if(transferred == 0 && !fs.finished()) {
+                    key.interestOps(SelectionKey.OP_WRITE);
+                    return;
+                }
+
+                if(fs.finished()) {
+                    fs.close();
+                    state.reset();
+                    key.interestOps(SelectionKey.OP_READ);
+                }
+                else {
+                   key.interestOps(SelectionKey.OP_WRITE);
+                }
+            }
+            else {
+                state.reset();
+                key.interestOps(SelectionKey.OP_READ);
+            }
         }
         catch (IOException e) {
             log.warn("Write failed, closing channel {}: {}", client, e.getMessage());
@@ -128,17 +145,8 @@ public class StateManager {
             } catch (IOException ex) {
                 log.debug("Error closing client after read failure", ex);
             }
-            return;
         }
 
-        if(output.hasRemaining())
-        {
-            key.interestOps(SelectionKey.OP_WRITE);
-        }
-        else {
-            state.reset();
-            key.interestOps(SelectionKey.OP_READ);
-        }
     }
 
 
