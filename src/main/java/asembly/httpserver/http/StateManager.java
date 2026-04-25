@@ -9,7 +9,6 @@ import asembly.httpserver.http.io.RequestParser;
 import asembly.httpserver.http.io.ResponseParser;
 import asembly.httpserver.http.response.JsonResponseService;
 import asembly.httpserver.http.response.ResponseSerializer;
-import asembly.httpserver.state.ChannelState;
 import asembly.httpserver.state.ClientState;
 import asembly.httpserver.state.ProxyState;
 import org.slf4j.Logger;
@@ -37,31 +36,10 @@ public class StateManager {
     public void onReadable(SelectionKey key) throws IOException {
 
         SocketChannel client = (SocketChannel) key.channel();
-        ChannelState state = (ChannelState) key.attachment();
+        ClientState state = (ClientState) key.attachment();
 
         try {
-            if(key.attachment() instanceof ClientState)
-            {
-                requestParser.parse(key);
-                var request = state.getRequest();
-                if (request != null) {
-                    dispatcher.handle(request, (ClientState) state, key);
-
-                    if (state.getResponse() != null)
-                    {
-                        var responseData = ResponseSerializer.toByteBuffer(state.getResponse());
-
-                        state.setOutput(responseData);
-
-                        key.interestOps(SelectionKey.OP_WRITE);
-                    }
-                    else
-                    {
-                        key.interestOps(SelectionKey.OP_READ);
-                    }
-                }
-            }
-            else if(key.attachment() instanceof ProxyState)
+            if(key.attachment() instanceof ProxyState)
             {
 
                 SocketChannel upstream = (SocketChannel) key.channel();
@@ -85,6 +63,27 @@ public class StateManager {
                 key.cancel();
                 upstream.close();
             }
+            else if(key.attachment() instanceof ClientState)
+            {
+                requestParser.parse(key);
+                var request = state.getRequest();
+                if (request != null) {
+                    dispatcher.handle(request, (ClientState) state, key);
+
+                    if (state.getResponse() != null)
+                    {
+                        var responseData = ResponseSerializer.toByteBuffer(state.getResponse());
+
+                        state.setOutput(responseData);
+
+                        key.interestOps(SelectionKey.OP_WRITE);
+                    }
+                    else
+                    {
+                        key.interestOps(SelectionKey.OP_READ);
+                    }
+                }
+            }
         }
         catch (IncompleteLineException e) {
            key.interestOps(SelectionKey.OP_READ);
@@ -100,7 +99,8 @@ public class StateManager {
             var responseData = ResponseSerializer.toByteBuffer(response);
             state.setOutput(responseData);
             key.interestOps(SelectionKey.OP_WRITE);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             log.warn("Read failed, closing channel {}: {}", client, e.getMessage());
             key.cancel();
             try {
@@ -114,13 +114,21 @@ public class StateManager {
     public void onWritable(SelectionKey key) {
 
         SocketChannel client = (SocketChannel) key.channel();
-        ChannelState state = (ChannelState) key.attachment();
+        ClientState state = (ClientState) key.attachment();
         var output = state.getOutput();
 
         try{
             client.write(output);
-        } catch (IOException e) {
-            log.error(e.getMessage());
+        }
+        catch (IOException e) {
+            log.warn("Write failed, closing channel {}: {}", client, e.getMessage());
+            key.cancel();
+            try {
+                client.close();
+            } catch (IOException ex) {
+                log.debug("Error closing client after read failure", ex);
+            }
+            return;
         }
 
         if(output.hasRemaining())

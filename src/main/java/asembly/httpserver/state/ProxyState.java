@@ -3,15 +3,16 @@ package asembly.httpserver.state;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-public class ProxyState extends ChannelState{
+public class ProxyState extends ClientState {
     private final SocketChannel client;
     private final ClientState clientState;
 
     public ProxyState(ByteBuffer requestOutput, ClientState clientState, SocketChannel client)
     {
-        super(ByteBuffer.allocate(8192), requestOutput);
+        super();
         this.client = client;
         this.clientState = clientState;
+        setOutput(requestOutput);
     }
 
     public SocketChannel getClient()

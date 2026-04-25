@@ -3,7 +3,7 @@ package asembly.httpserver.http.io;
 import asembly.httpserver.enums.ParsingState;
 import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.http.Request;
-import asembly.httpserver.state.ChannelState;
+import asembly.httpserver.state.ClientState;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -23,7 +23,7 @@ public class RequestParser implements HttpParser{
     public void parse(SelectionKey key) throws IOException {
 
         SocketChannel client = (SocketChannel) key.channel();
-        ChannelState state = (ChannelState) key.attachment();
+        ClientState state = (ClientState) key.attachment();
 
         ByteBuffer buffer = state.getInput();
         try {
