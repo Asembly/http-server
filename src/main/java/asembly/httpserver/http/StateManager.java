@@ -50,6 +50,8 @@ public class StateManager {
 
                 var response = upstreamState.getResponse();
 
+                log.debug(response.toString());
+
                 if (response != null) {
                     SelectionKey clientKey = upstreamState.getClient().keyFor(key.selector());
 
@@ -68,6 +70,9 @@ public class StateManager {
             {
                 requestParser.parse(key);
                 var request = state.getRequest();
+
+                log.debug(request.toString());
+
                 if (request != null) {
                     dispatcher.handle(request, (ClientState) state, key);
                 }
