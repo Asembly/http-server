@@ -1,5 +1,6 @@
 package asembly.httpserver.cache;
 
+import asembly.httpserver.HttpServer;
 import asembly.httpserver.exception.ResourceMaxSizeException;
 import asembly.httpserver.exception.ResourceNotFoundException;
 import asembly.httpserver.service.FileService;
@@ -17,8 +18,8 @@ public class FileCache implements Cache<String, byte[]>{
     private final ConcurrentMap<String, byte[]> cache = new ConcurrentHashMap<>();
     private final FileService fileService;
 
-    private static final int MAX_FILE_SIZE = 5 * 1024 * 1024; //Mb
-    private static final int MAX_TOTAL_CACHE = 256 * 1024 * 1024; //Mb
+    private static final long MAX_FILE_SIZE = HttpServer.config.cache.maxEntryBytes(); //Mb
+    private static final long MAX_TOTAL_CACHE = HttpServer.config.cache.maxBytes(); //Mb
 
     private static int totalCacheSize = 0;
 
@@ -58,9 +59,12 @@ public class FileCache implements Cache<String, byte[]>{
             if(value == null)
                 throw new ResourceNotFoundException();
 
-            log.debug("File put to cache with size: {} kB", fileSize / 1024);
-            cache.put(key, value);
-            totalCacheSize += fileSize;
+            if(HttpServer.config.cache.enabled())
+            {
+                cache.put(key, value);
+                totalCacheSize += fileSize;
+                log.debug("File put to cache with size: {} kB", fileSize / 1024);
+            }
         } catch (NoSuchFileException e) {
             throw new ResourceNotFoundException();
         }
