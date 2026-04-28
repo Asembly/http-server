@@ -59,6 +59,7 @@ public class StaticHandler implements AsyncHandler {
 
             var response = new Response.Builder()
                     .statusCode(200)
+                    .addHeader("Connection", "keep-alive")
                     .addHeader("Content-Type", contentType)
                     .addHeader("Content-Length", String.valueOf(fileState.getSize()))
                     .version("HTTP/1.1")

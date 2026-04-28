@@ -16,7 +16,7 @@ import java.util.List;
 public class FileService {
 
     private static final Logger log = LoggerFactory.getLogger(FileService.class);
-    private final Path rootDir = Paths.get(HttpServer.config.getStaticDir());
+    private final Path rootDir = Paths.get(HttpServer.config.directory.publicRoot());
 
     public FileService()
     {

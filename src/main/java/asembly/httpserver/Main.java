@@ -1,22 +1,23 @@
 package asembly.httpserver;
 
 import asembly.httpserver.config.ServerConfig;
-import asembly.httpserver.config.ServerConfigLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
+
     public static void main(String[] args) {
         try {
-            String configPath = args.length > 0 ? args[0] : "server.properties";
-            ServerConfig config = ServerConfigLoader.load(configPath);
 
-            log.info("The configuration file has been loaded.");
+            ServerConfig config = ServerConfig.loadConfig(Paths.get("config.json"));
+
+            log.info("Config file is loaded");
 
             HttpServer server = new HttpServer(config);
 

@@ -19,7 +19,7 @@ public class RouteDispatcher {
     {
         var staticHandler = new StaticHandler();
         var proxyHandler = new ProxyHandler(proxyService);
-        router.addHandler("GET",  "/" + HttpServer.config.getStaticDir(), staticHandler);
+        router.addHandler("GET",  "/" + HttpServer.config.directory.publicRoot(), staticHandler);
         router.addHandler("GET",  "/favicon.ico", staticHandler);
         router.addHandler("GET", "/api", proxyHandler);
         router.addHandler("POST", "/api", proxyHandler);

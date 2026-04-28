@@ -17,7 +17,7 @@ public class FileCache implements Cache<String, byte[]>{
     private final ConcurrentMap<String, byte[]> cache = new ConcurrentHashMap<>();
     private final FileService fileService;
 
-    private static final int MAX_FILE_SIZE = 8 * 1024 * 1024; //Mb
+    private static final int MAX_FILE_SIZE = 5 * 1024 * 1024; //Mb
     private static final int MAX_TOTAL_CACHE = 256 * 1024 * 1024; //Mb
 
     private static int totalCacheSize = 0;

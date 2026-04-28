@@ -1,15 +1,16 @@
 package asembly.httpserver.http.handler.proxy;
 
-import java.net.URI;
+import asembly.httpserver.config.entity.Path;
+
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RoundRobinLB implements LoadBalancer{
 
-    private final List<URI> upstreams;
+    private final List<Path> upstreams;
     private final AtomicInteger index = new AtomicInteger(0);
 
-    public RoundRobinLB(List<URI> upstreams)
+    public RoundRobinLB(List<Path> upstreams)
     {
         if(upstreams == null || upstreams.isEmpty())
             throw new IllegalArgumentException("Upstreams list cannot be null or empty");
@@ -17,10 +18,10 @@ public class RoundRobinLB implements LoadBalancer{
     }
 
     @Override
-    public URI choose() {
+    public Path choose() {
 
         int i = Math.floorMod(index.getAndIncrement(), upstreams.size());
-        URI uri = upstreams.get(i);
-        return uri;
+        Path path = upstreams.get(i);
+        return path;
     }
 }

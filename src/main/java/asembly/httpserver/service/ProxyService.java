@@ -1,6 +1,7 @@
 package asembly.httpserver.service;
 
 import asembly.httpserver.HttpServer;
+import asembly.httpserver.config.entity.Path;
 import asembly.httpserver.exception.BalancerNotFoundException;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.RequestSerializer;
@@ -11,7 +12,6 @@ import asembly.httpserver.state.ProxyState;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class ProxyService {
 
     public ProxyService()
     {
-        for(var item: HttpServer.config.getProxyUpstreams().entrySet())
+        for(var item: HttpServer.config.upstream.entrySet())
             balancers.put(item.getKey(), new RoundRobinLB(item.getValue()));
     }
 
@@ -34,11 +34,11 @@ public class ProxyService {
         return balancer;
     }
 
-    public void proxy(Request request, URI route, SelectionKey key)
+    public void proxy(Request request, Path route, SelectionKey key)
     {
         try{
             if (route != null) {
-                InetSocketAddress upstreamAddress = new InetSocketAddress(route.getHost(), route.getPort());
+                InetSocketAddress upstreamAddress = new InetSocketAddress(route.host(), route.port());
                     var buffer = RequestSerializer.toByteBuffer(request);
 
                     SocketChannel upstream = SocketChannel.open();
