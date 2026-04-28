@@ -15,6 +15,23 @@ public class Response extends HttpMessage {
         return statusCode;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getVersion())
+                .append(' ')
+                .append(statusCode)
+                .append('\n');
+
+        getHeaders().forEach((k, v) -> sb.append(k).append(": ").append(v).append('\n'));
+
+        sb.append("Body: ")
+                .append(getBody() != null ? getBody().length : 0)
+                .append(" bytes");
+
+        return sb.toString();
+    }
+
     public static class Builder extends HttpMessage.Builder<Builder, HttpMessage>
     {
         private int statusCode;
