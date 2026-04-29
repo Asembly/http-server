@@ -1,6 +1,6 @@
 package asembly.httpserver.config.entity;
 
-public record Server(
+public record ServerConfig(
         String host,
         String root,
         int port,

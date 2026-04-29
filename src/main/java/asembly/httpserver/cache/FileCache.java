@@ -18,8 +18,8 @@ public class FileCache implements Cache<String, byte[]>{
     private final ConcurrentMap<String, byte[]> cache = new ConcurrentHashMap<>();
     private final FileService fileService;
 
-    private static final long MAX_FILE_SIZE = HttpServer.config.cache.maxEntryBytes(); //Mb
-    private static final long MAX_TOTAL_CACHE = HttpServer.config.cache.maxBytes(); //Mb
+    private static final long MAX_FILE_SIZE = HttpServer.config.cacheConfig.maxEntryBytes(); //Mb
+    private static final long MAX_TOTAL_CACHE = HttpServer.config.cacheConfig.maxBytes(); //Mb
 
     private static int totalCacheSize = 0;
 
@@ -59,7 +59,7 @@ public class FileCache implements Cache<String, byte[]>{
             if(value == null)
                 throw new ResourceNotFoundException();
 
-            if(HttpServer.config.cache.enabled())
+            if(HttpServer.config.cacheConfig.enabled())
             {
                 cache.put(key, value);
                 totalCacheSize += fileSize;

@@ -1,6 +1,6 @@
 package asembly.httpserver.config.entity;
 
-public record Logging(
+public record LoggingConfig(
         String level,
         String accessLog,
         String errorLog

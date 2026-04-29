@@ -30,8 +30,8 @@ public class HttpServer {
     public HttpServer(ServerConfig config) throws UnknownHostException {
         this.config = config;
         this.address = new InetSocketAddress(
-                config.server.host(),
-                config.server.port()
+                config.serverConfig.host(),
+                config.serverConfig.port()
         );
         this.workers = new ArrayList<>();
         this.stateManager = new StateManager();
@@ -39,7 +39,7 @@ public class HttpServer {
 
     public void start() throws IOException {
 
-        int n = config.server.threads();
+        int n = config.serverConfig.threads();
         for (int i = 0; i < n; i++) {
             SelectorWorker w = new SelectorWorker("worker - " + i, stateManager);
             workers.add(w);

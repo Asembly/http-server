@@ -52,6 +52,7 @@ public class StaticHandler implements AsyncHandler {
             //File not found
             var response = JsonResponseService.notFound("Resource not found", request.getPath());
             state.setOutput(ResponseSerializer.toByteBuffer(response));
+
         } catch (ResourceMaxSizeException e) {
             //File have a max size
             FileTransferState fileState = new FileTransferState(Paths.get(request.getPath().substring(1)));
@@ -62,6 +63,7 @@ public class StaticHandler implements AsyncHandler {
                     .addHeader("Connection", "keep-alive")
                     .addHeader("Content-Type", contentType)
                     .addHeader("Content-Length", String.valueOf(fileState.getSize()))
+                    .addHeader("Accept-Ranges", String.valueOf(fileState.getSize()))
                     .version("HTTP/1.1")
                     .build();
 

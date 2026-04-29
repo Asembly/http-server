@@ -1,7 +1,7 @@
 package asembly.httpserver.service;
 
 import asembly.httpserver.HttpServer;
-import asembly.httpserver.config.entity.Path;
+import asembly.httpserver.config.entity.PathConfig;
 import asembly.httpserver.enums.LoadBalancerType;
 import asembly.httpserver.exception.BalancerNotFoundException;
 import asembly.httpserver.http.Request;
@@ -50,7 +50,7 @@ public class ProxyService {
         }
     }
 
-    public void proxy(Request request, Path route, SelectionKey key)
+    public void proxy(Request request, PathConfig route, SelectionKey key)
     {
         try{
             if (route != null) {

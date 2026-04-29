@@ -1,7 +1,7 @@
 package asembly.httpserver.http.handler.proxy;
 
-import asembly.httpserver.config.entity.Path;
+import asembly.httpserver.config.entity.PathConfig;
 
 public interface LoadBalancer {
-    Path choose();
+    PathConfig choose();
 }

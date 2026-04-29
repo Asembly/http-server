@@ -2,7 +2,7 @@ package asembly.httpserver.config.entity;
 
 import java.util.List;
 
-public record Gzip(
+public record GzipConfig(
         boolean enabled,
         int minBytes,
         List<String>types

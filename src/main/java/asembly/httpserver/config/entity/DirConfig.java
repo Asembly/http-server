@@ -1,6 +1,6 @@
 package asembly.httpserver.config.entity;
 
-public record Dir(
+public record DirConfig(
         String publicRoot
 ) {
 }

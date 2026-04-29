@@ -1,6 +1,6 @@
 package asembly.httpserver.config.entity;
 
-public record Cache(
+public record CacheConfig(
         boolean enabled,
         long maxBytes,
         long maxEntryBytes,

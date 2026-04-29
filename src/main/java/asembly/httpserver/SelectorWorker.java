@@ -45,14 +45,23 @@ public class SelectorWorker {
                 while (it.hasNext()) {
                     SelectionKey key = it.next();
                     it.remove();
-                    if (key.isReadable()) {
-                        stateManager.onReadable(key);
-                    }
-                    else if (key.isWritable()) {
-                        stateManager.onWritable(key);
-                    }
-                    else if (key.isConnectable()) {
-                        isConnectable(key);
+
+                    if(!key.isValid())
+                        continue;
+
+                    try {
+                        if (key.isReadable()) {
+                            stateManager.onReadable(key);
+                        } else if (key.isWritable()) {
+                            stateManager.onWritable(key);
+                        } else if (key.isConnectable()) {
+                            isConnectable(key);
+                        }
+                    } catch (IOException e) {
+                        key.cancel();
+                        try {
+                            key.channel().close();
+                        } catch (IOException ignore) {}
                     }
                 }
             }
@@ -60,6 +69,7 @@ public class SelectorWorker {
         catch (IOException e) {
             log.error(e.getMessage());
             log.error("StackTrace: {}", e.getStackTrace());
+
         }
     }
 
@@ -72,7 +82,8 @@ public class SelectorWorker {
             } else {
                 key.interestOps(SelectionKey.OP_CONNECT);
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             ProxyState state = (ProxyState) key.attachment();
 
             SocketChannel client = state.getClient();
@@ -80,9 +91,7 @@ public class SelectorWorker {
 
             var response = JsonResponseService.badGateway(e.getMessage(),
                     clientState.getRequest().getPath());
-
             var responseData = ResponseSerializer.toByteBuffer(response);
-
             clientState.setOutput(responseData);
             client.keyFor(key.selector()).interestOps(SelectionKey.OP_WRITE);
         }

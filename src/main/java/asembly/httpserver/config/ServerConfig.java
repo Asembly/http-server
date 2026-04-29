@@ -9,12 +9,12 @@ import java.util.Map;
 
 public class ServerConfig {
 
-    public Server server;
-    public Dir directory;
-    public Cache cache;
-    public Map<String, Service> upstream;
-    public Gzip gzip;
-    public Logging logging;
+    public asembly.httpserver.config.entity.ServerConfig serverConfig;
+    public DirConfig directory;
+    public CacheConfig cacheConfig;
+    public Map<String, ServiceConfig> upstream;
+    public GzipConfig gzipConfig;
+    public LoggingConfig loggingConfig;
 
     public static ServerConfig loadConfig(Path path) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
