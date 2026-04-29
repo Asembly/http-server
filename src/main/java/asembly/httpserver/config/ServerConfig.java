@@ -4,7 +4,7 @@ import asembly.httpserver.config.entity.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
-import java.util.List;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class ServerConfig {
@@ -12,11 +12,11 @@ public class ServerConfig {
     public Server server;
     public Dir directory;
     public Cache cache;
-    public Map<String, List<Path>> upstream;
+    public Map<String, Service> upstream;
     public Gzip gzip;
     public Logging logging;
 
-    public static ServerConfig loadConfig(java.nio.file.Path path) throws IOException {
+    public static ServerConfig loadConfig(Path path) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(path.toFile(), ServerConfig.class);
     }
