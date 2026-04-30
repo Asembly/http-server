@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
@@ -24,35 +23,35 @@ public class HttpServer {
     public static ServerConfig config;
     private static int idx = 0;
 
-    private final InetAddress address;
+    private final InetSocketAddress address;
     private final List<SelectorWorker> workers;
     private final StateManager stateManager;
 
-    private final int port;
-
     public HttpServer(ServerConfig config) throws UnknownHostException {
         this.config = config;
-        this.port = config.getPort();
-        this.address = InetAddress.getByName(config.getHost());
+        this.address = new InetSocketAddress(
+                config.serverConfig.host(),
+                config.serverConfig.port()
+        );
         this.workers = new ArrayList<>();
         this.stateManager = new StateManager();
     }
 
     public void start() throws IOException {
 
-        int n = config.getThreads();
+        int n = config.serverConfig.threads();
         for (int i = 0; i < n; i++) {
             SelectorWorker w = new SelectorWorker("worker - " + i, stateManager);
             workers.add(w);
         }
 
         try (var server = ServerSocketChannel.open()) {
-            log.info("Server started {}:{}", address.getHostAddress(), port);
+            log.info("Server started {}:{}", address.getAddress(), address.getPort());
 
             var selector = Selector.open();
 
             server.configureBlocking(false);
-            server.bind(new InetSocketAddress(config.getHost(), config.getPort()));
+            server.bind(address);
             server.register(selector, SelectionKey.OP_ACCEPT);
 
             while(true)

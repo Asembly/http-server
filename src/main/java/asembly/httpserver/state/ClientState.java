@@ -25,6 +25,7 @@ public class ClientState {
     private ParsingState parsingState = ParsingState.START_LINE;
 
     private byte[] body;
+    private FileTransferState fileState;
 
     public ClientState() {
         this.input = ByteBuffer.allocate(8192);
@@ -66,6 +67,13 @@ public class ClientState {
     {
         this.headers.put(entry.getKey(), entry.getValue());
     }
+    public void setFileState(FileTransferState fileState) {
+        this.fileState = fileState;
+    }
+    public FileTransferState getFileState() {
+        return fileState;
+    }
+
 
     //reset current state
     public void reset()
@@ -74,6 +82,7 @@ public class ClientState {
         this.setRequest(null);
         this.setBody(null);
         this.setOutput(null);
+        this.setFileState(null);
 
         if(this.getInput() != null)
             this.getInput().clear();

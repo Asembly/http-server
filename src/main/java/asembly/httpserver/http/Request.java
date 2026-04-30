@@ -60,6 +60,37 @@ public class Request extends HttpMessage{
         return params;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(method)
+                .append(' ')
+                .append(path)
+                .append(' ')
+                .append(getVersion())
+                .append('\n');
+
+        sb.append("Headers:\n");
+        getHeaders().forEach((k, v) ->
+                sb.append("  ").append(k).append(": ").append(v).append('\n')
+        );
+
+        if (!params.isEmpty()) {
+            sb.append("Params:\n");
+            params.forEach((k, v) ->
+                    sb.append("  ").append(k).append(" = ").append(v).append('\n')
+            );
+        }
+
+        sb.append("Body:\n")
+                .append("  length = ")
+                .append(getBody() != null ? getBody().length : 0)
+                .append(" bytes");
+
+        return sb.toString();
+    }
+
     public static class Builder extends HttpMessage.Builder<Builder, HttpMessage>
     {
         private final Map<String, String> params = new HashMap<>();
@@ -100,6 +131,5 @@ public class Request extends HttpMessage{
         {
             return new Request(headers, params, path, method, version, boundary, body);
         }
-
     }
 }

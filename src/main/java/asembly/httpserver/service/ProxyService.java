@@ -1,17 +1,19 @@
 package asembly.httpserver.service;
 
 import asembly.httpserver.HttpServer;
+import asembly.httpserver.config.entity.PathConfig;
+import asembly.httpserver.enums.LoadBalancerType;
 import asembly.httpserver.exception.BalancerNotFoundException;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.RequestSerializer;
 import asembly.httpserver.http.handler.proxy.LoadBalancer;
-import asembly.httpserver.http.handler.proxy.RoundRobinLB;
+import asembly.httpserver.http.handler.proxy.LoadBalancerFactory;
 import asembly.httpserver.state.ClientState;
 import asembly.httpserver.state.ProxyState;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URI;
+import java.net.Socket;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
@@ -23,8 +25,11 @@ public class ProxyService {
 
     public ProxyService()
     {
-        for(var item: HttpServer.config.getProxyUpstreams().entrySet())
-            balancers.put(item.getKey(), new RoundRobinLB(item.getValue()));
+        for(var item: HttpServer.config.upstream.entrySet())
+            balancers.put(item.getKey(), LoadBalancerFactory.create(
+                    LoadBalancerType.fromString(item.getValue().balancer()),
+                    item.getValue().routes())
+            );
     }
 
     public LoadBalancer getBalancer(String serviceName) throws BalancerNotFoundException {
@@ -34,24 +39,35 @@ public class ProxyService {
         return balancer;
     }
 
-    public void proxy(Request request, URI route, SelectionKey key)
+    public boolean ping(String host, int port, int timeoutMillis)
+    {
+        try(Socket socket = new Socket())
+        {
+            socket.connect(new InetSocketAddress(host, port), timeoutMillis);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    public void proxy(Request request, PathConfig route, SelectionKey key)
     {
         try{
             if (route != null) {
-                InetSocketAddress upstreamAddress = new InetSocketAddress(route.getHost(), route.getPort());
-                    var buffer = RequestSerializer.toByteBuffer(request);
+                InetSocketAddress upstreamAddress = new InetSocketAddress(route.host(), route.port());
+                var buffer = RequestSerializer.toByteBuffer(request);
 
-                    SocketChannel upstream = SocketChannel.open();
-                    upstream.configureBlocking(false);
-                    upstream.connect(upstreamAddress);
-                    var upstreamState = new ProxyState(buffer, (ClientState) key.attachment(), (SocketChannel) key.channel());
-                    upstream.register(key.selector(), SelectionKey.OP_CONNECT, upstreamState);
+                SocketChannel upstream = SocketChannel.open();
+                upstream.configureBlocking(false);
+                upstream.connect(upstreamAddress);
+                var upstreamState = new ProxyState(buffer, (ClientState) key.attachment(), (SocketChannel) key.channel());
+                upstream.register(key.selector(), SelectionKey.OP_CONNECT, upstreamState);
             }
         }
         catch (IOException e) {
             throw new RuntimeException(e);
         }
-
     }
+
 
 }

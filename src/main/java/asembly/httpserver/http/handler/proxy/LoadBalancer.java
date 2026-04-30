@@ -1,9 +1,7 @@
 package asembly.httpserver.http.handler.proxy;
 
-import java.net.URI;
+import asembly.httpserver.config.entity.PathConfig;
 
 public interface LoadBalancer {
-
-    URI choose();
-
+    PathConfig choose();
 }
