@@ -1,4 +1,6 @@
-package asembly.httpserver.http;
+package asembly.httpserver.http.serialize;
+
+import asembly.httpserver.http.Request;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

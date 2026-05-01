@@ -1,4 +1,4 @@
-package asembly.httpserver.config.entity;
+package asembly.httpserver.config.logging;
 
 public record LoggingConfig(
         String level,

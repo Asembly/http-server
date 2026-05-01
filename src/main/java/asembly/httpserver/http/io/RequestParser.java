@@ -3,7 +3,7 @@ package asembly.httpserver.http.io;
 import asembly.httpserver.enums.ParsingState;
 import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.http.Request;
-import asembly.httpserver.state.ClientState;
+import asembly.httpserver.http.state.ClientState;
 
 import java.io.IOException;
 import java.net.SocketException;

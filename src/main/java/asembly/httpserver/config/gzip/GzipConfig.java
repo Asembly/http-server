@@ -1,4 +1,4 @@
-package asembly.httpserver.config.entity;
+package asembly.httpserver.config.gzip;
 
 import java.util.List;
 

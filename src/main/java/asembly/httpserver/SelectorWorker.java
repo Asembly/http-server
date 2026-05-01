@@ -2,9 +2,9 @@ package asembly.httpserver;
 
 import asembly.httpserver.http.StateManager;
 import asembly.httpserver.http.response.JsonResponseService;
-import asembly.httpserver.http.response.ResponseSerializer;
-import asembly.httpserver.state.ClientState;
-import asembly.httpserver.state.ProxyState;
+import asembly.httpserver.http.serialize.ResponseSerializer;
+import asembly.httpserver.http.state.ClientState;
+import asembly.httpserver.http.state.ProxyState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

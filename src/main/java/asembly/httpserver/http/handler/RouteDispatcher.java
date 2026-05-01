@@ -5,7 +5,7 @@ import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
 import asembly.httpserver.http.handler.proxy.ProxyHandler;
 import asembly.httpserver.service.ProxyService;
-import asembly.httpserver.state.ClientState;
+import asembly.httpserver.http.state.ClientState;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;

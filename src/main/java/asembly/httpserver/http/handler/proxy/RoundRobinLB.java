@@ -1,6 +1,6 @@
 package asembly.httpserver.http.handler.proxy;
 
-import asembly.httpserver.config.entity.PathConfig;
+import asembly.httpserver.config.PathConfig;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

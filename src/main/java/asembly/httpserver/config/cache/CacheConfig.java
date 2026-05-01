@@ -1,4 +1,4 @@
-package asembly.httpserver.config.entity;
+package asembly.httpserver.config.cache;
 
 public record CacheConfig(
         boolean enabled,

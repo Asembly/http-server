@@ -1,4 +1,4 @@
-package asembly.httpserver.http.response;
+package asembly.httpserver.http.serialize;
 
 import asembly.httpserver.enums.StatusCode;
 import asembly.httpserver.http.Response;

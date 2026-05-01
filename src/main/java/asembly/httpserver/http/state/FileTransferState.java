@@ -1,4 +1,4 @@
-package asembly.httpserver.state;
+package asembly.httpserver.http.state;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

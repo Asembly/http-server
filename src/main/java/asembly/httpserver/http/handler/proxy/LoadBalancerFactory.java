@@ -1,6 +1,6 @@
 package asembly.httpserver.http.handler.proxy;
 
-import asembly.httpserver.config.entity.PathConfig;
+import asembly.httpserver.config.PathConfig;
 import asembly.httpserver.enums.LoadBalancerType;
 
 import java.util.List;

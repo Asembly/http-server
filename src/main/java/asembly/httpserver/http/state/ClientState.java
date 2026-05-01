@@ -1,4 +1,4 @@
-package asembly.httpserver.state;
+package asembly.httpserver.http.state;
 
 import asembly.httpserver.enums.ParsingState;
 import asembly.httpserver.http.Request;

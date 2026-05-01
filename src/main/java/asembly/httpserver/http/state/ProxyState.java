@@ -1,4 +1,4 @@
-package asembly.httpserver.state;
+package asembly.httpserver.http.state;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;

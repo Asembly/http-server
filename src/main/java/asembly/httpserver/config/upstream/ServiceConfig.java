@@ -1,4 +1,6 @@
-package asembly.httpserver.config.entity;
+package asembly.httpserver.config.upstream;
+
+import asembly.httpserver.config.PathConfig;
 
 import java.util.List;
 

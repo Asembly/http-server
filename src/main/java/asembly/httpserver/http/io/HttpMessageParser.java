@@ -3,7 +3,7 @@ package asembly.httpserver.http.io;
 import asembly.httpserver.enums.ParsingState;
 import asembly.httpserver.exception.HttpParseException;
 import asembly.httpserver.exception.IncompleteLineException;
-import asembly.httpserver.state.ClientState;
+import asembly.httpserver.http.state.ClientState;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

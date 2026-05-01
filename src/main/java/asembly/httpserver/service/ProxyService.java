@@ -1,15 +1,15 @@
 package asembly.httpserver.service;
 
 import asembly.httpserver.HttpServer;
-import asembly.httpserver.config.entity.PathConfig;
+import asembly.httpserver.config.PathConfig;
 import asembly.httpserver.enums.LoadBalancerType;
 import asembly.httpserver.exception.InternalException;
 import asembly.httpserver.http.Request;
-import asembly.httpserver.http.RequestSerializer;
+import asembly.httpserver.http.serialize.RequestSerializer;
 import asembly.httpserver.http.handler.proxy.LoadBalancer;
 import asembly.httpserver.http.handler.proxy.LoadBalancerFactory;
-import asembly.httpserver.state.ClientState;
-import asembly.httpserver.state.ProxyState;
+import asembly.httpserver.http.state.ClientState;
+import asembly.httpserver.http.state.ProxyState;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
