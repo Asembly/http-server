@@ -1,9 +1,8 @@
 package asembly.httpserver.http;
 
-import asembly.httpserver.exception.BalancerNotFoundException;
-import asembly.httpserver.exception.ClientCloseException;
 import asembly.httpserver.exception.HttpParseException;
 import asembly.httpserver.exception.IncompleteLineException;
+import asembly.httpserver.exception.InternalException;
 import asembly.httpserver.http.handler.RouteDispatcher;
 import asembly.httpserver.http.io.RequestParser;
 import asembly.httpserver.http.io.ResponseParser;
@@ -41,73 +40,43 @@ public class StateManager {
 
         try {
             if(key.attachment() instanceof ProxyState)
-            {
-
-                SocketChannel upstream = (SocketChannel) key.channel();
-                var upstreamState = (ProxyState) state;
-
-                responseParser.parse(key);
-
-                var response = upstreamState.getResponse();
-
-                log.debug(response.toString());
-
-                if (response != null) {
-                    SelectionKey clientKey = upstreamState.getClient().keyFor(key.selector());
-
-                    var responseData = ResponseSerializer.toByteBuffer(response);
-
-                    upstreamState.getClientState().setOutput(responseData);
-
-                    if (clientKey != null && clientKey.isValid())
-                        clientKey.interestOps(SelectionKey.OP_WRITE);
-                }
-
-                key.cancel();
-                upstream.close();
-            }
+                onProxyState(key, (ProxyState) state);
             else if(key.attachment() instanceof ClientState)
-            {
-                requestParser.parse(key);
-                var request = state.getRequest();
-
-                log.debug(request.toString());
-
-                if (request != null) {
-                    dispatcher.handle(request, (ClientState) state, key);
-                }
-            }
+                onClientState(key, state);
         }
         catch (IncompleteLineException e) {
            key.interestOps(SelectionKey.OP_READ);
         }
-        catch (ClientCloseException e)
-        {
-            client.close();
-            key.cancel();
-        }
-        catch (HttpParseException | BalancerNotFoundException e) {
+        catch (HttpParseException e) {
+            log.error("HttpParseException: {}\n{}", e.getMessage(), e.getStackTrace());
+
             var path = state.getRequest() == null ? null : state.getRequest().getPath();
             var response = JsonResponseService.badRequest(e.getMessage(), path);
-            var responseData = ResponseSerializer.toByteBuffer(response);
-            state.setOutput(responseData);
+            var buffer = ResponseSerializer.toByteBuffer(response);
+            state.setOutput(buffer);
+            key.interestOps(SelectionKey.OP_WRITE);
+        }
+        catch (InternalException e) {
+            log.error("InternalException: {}\n{}", e.getMessage(), e.getStackTrace());
+
+            var response = JsonResponseService.internalError(e.getMessage());
+            var buffer = ResponseSerializer.toByteBuffer(response);
+            state.setOutput(buffer);
             key.interestOps(SelectionKey.OP_WRITE);
         }
         catch (IOException e) {
             log.warn("Read failed, closing channel {}: {}", client, e.getMessage());
+
             key.cancel();
-            try {
-                client.close();
-            } catch (IOException ex) {
-                log.debug("Error closing client after read failure", ex);
-            }
+            client.close();
         }
     }
 
-    public void onWritable(SelectionKey key) {
+    public void onWritable(SelectionKey key) throws IOException {
 
         SocketChannel client = (SocketChannel) key.channel();
         ClientState state = (ClientState) key.attachment();
+
         var output = state.getOutput();
 
         try{
@@ -145,14 +114,42 @@ public class StateManager {
         catch (IOException e) {
             log.warn("Write failed, closing channel {}: {}", client, e.getMessage());
             key.cancel();
-            try {
-                client.close();
-            } catch (IOException ex) {
-                log.debug("Error closing client after read failure", ex);
-            }
+            client.close();
         }
-
     }
 
+    private void onClientState(SelectionKey key, ClientState state) throws IOException {
+        requestParser.parse(key);
+        var request = state.getRequest();
+
+        log.debug("Client request:\n{}", request);
+
+        dispatcher.handle(request, (ClientState) state, key);
+    }
+
+    private void onProxyState(SelectionKey key, ProxyState state) throws IOException {
+        SocketChannel upstream = (SocketChannel) key.channel();
+
+        //Parse proxy response
+        responseParser.parse(key);
+        var response = state.getResponse();
+
+        log.debug("Proxy response received:\n{}",response);
+
+        //Get the client state to write the proxy response to it
+        SelectionKey clientKey = state.getClient().keyFor(key.selector());
+        var buffer = ResponseSerializer.toByteBuffer(response);
+        state.getClientState().setOutput(buffer);
+
+        if (clientKey != null && clientKey.isValid())
+            clientKey.interestOps(SelectionKey.OP_WRITE);
+        else
+        {
+            log.error("Client key {}, is not available", clientKey);
+        }
+
+        key.cancel();
+        upstream.close();
+    }
 
 }
