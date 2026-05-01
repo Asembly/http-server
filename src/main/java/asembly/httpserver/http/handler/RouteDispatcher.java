@@ -4,6 +4,7 @@ import asembly.httpserver.HttpServer;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.Response;
 import asembly.httpserver.http.handler.proxy.ProxyHandler;
+import asembly.httpserver.http.serialize.ResponseSerializer;
 import asembly.httpserver.service.ProxyService;
 import asembly.httpserver.http.state.ClientState;
 
@@ -23,6 +24,11 @@ public class RouteDispatcher {
         router.addHandler("get",  "/favicon.ico", staticHandler);
         router.addHandler("get", "/api", proxyHandler);
         router.addHandler("port", "/api", proxyHandler);
+
+        var autoIndex =  HttpServer.config.auto_index;
+        for(var location: autoIndex.locations())
+            router.addHandler("get", location.alias(), new AutoIndexHandler(location.root(), autoIndex.format()));
+
     }
 
     public void handle(Request request, ClientState state, SelectionKey key) throws IOException {
@@ -31,7 +37,8 @@ public class RouteDispatcher {
         if(!handler.isAsync())
         {
             Response response = handler.handleSync(request);
-            state.setResponse(response);
+            state.setOutput(ResponseSerializer.toByteBuffer(response));
+            key.interestOps(SelectionKey.OP_WRITE);
         }
         else {
             handler.handleAsync(request, key);
