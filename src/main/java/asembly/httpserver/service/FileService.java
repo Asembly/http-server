@@ -56,6 +56,25 @@ public class FileService {
         return paths;
     }
 
+    public List<Path> getFiles(String directory)
+    {
+        List<Path> paths = new ArrayList<>();
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(Path.of(directory)))
+        {
+            for(Path path: stream)
+            {
+                if(Files.isRegularFile(path))
+                {
+                    paths.add(path);
+                }
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+
+        return paths;
+    }
+
     public byte[] getFile(String path){
         Path file = Paths.get(rootDir + "/" + path).normalize();
 
