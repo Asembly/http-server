@@ -13,16 +13,16 @@ import java.nio.channels.SelectionKey;
 public class RouteDispatcher {
 
     private final Router router = new Router();;
-    private final ProxyService proxyService = new ProxyService();
 
     public RouteDispatcher()
     {
         var staticHandler = new StaticHandler();
+        ProxyService proxyService = new ProxyService();
         var proxyHandler = new ProxyHandler(proxyService);
-        router.addHandler("GET",  "/" + HttpServer.config.directory.publicRoot(), staticHandler);
-        router.addHandler("GET",  "/favicon.ico", staticHandler);
-        router.addHandler("GET", "/api", proxyHandler);
-        router.addHandler("POST", "/api", proxyHandler);
+        router.addHandler("get",  "/" + HttpServer.config.directory.publicRoot(), staticHandler);
+        router.addHandler("get",  "/favicon.ico", staticHandler);
+        router.addHandler("get", "/api", proxyHandler);
+        router.addHandler("port", "/api", proxyHandler);
     }
 
     public void handle(Request request, ClientState state, SelectionKey key) throws IOException {

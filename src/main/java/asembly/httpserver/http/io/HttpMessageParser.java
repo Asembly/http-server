@@ -43,7 +43,7 @@ public class HttpMessageParser{
         }
 
         String line = new String(lineBytes, StandardCharsets.UTF_8);
-        var startLine = startLineParser.parse(line);
+        var startLine = startLineParser.parse(line.toLowerCase());
 
         state.getStartLine().addAll(startLine);
         state.setParsingState(ParsingState.HEADERS);
@@ -56,11 +56,11 @@ public class HttpMessageParser{
         if (lineBytes == null)
             throw new IncompleteLineException();
 
-        String line = new String(lineBytes, StandardCharsets.UTF_8);
+        String line = new String(lineBytes, StandardCharsets.UTF_8).toLowerCase();
 
         if (line.isEmpty()) {
             int contentLength = Integer.parseInt(
-                    state.getHeaders().getOrDefault("Content-Length", "0")
+                    state.getHeaders().getOrDefault("content-length", "0")
             );
 
             if (contentLength > 0) {
@@ -79,7 +79,7 @@ public class HttpMessageParser{
     private void parseBody(ByteBuffer buffer, ClientState state) throws HttpParseException {
 
         long expected = Long.parseLong(
-                state.getHeaders().getOrDefault("Content-Length", "0")
+                state.getHeaders().getOrDefault("content-length", "0")
         );
 
         if (expected < 0 || expected > ClientState.MAX_BODY_SIZE) {
