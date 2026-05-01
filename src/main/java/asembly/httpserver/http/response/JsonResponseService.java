@@ -10,8 +10,8 @@ public class JsonResponseService {
 
     private final static ObjectMapper mapper = new ObjectMapper();
 
-    public Response internalError(String message, String path) {
-        HttpError dto = new HttpError(500, "INTERNAL_ERROR", message, path);
+    public static Response internalError(String message) {
+        HttpError dto = new HttpError(500, "INTERNAL_ERROR", message, null);
         return toJson(dto, 500);
     }
 

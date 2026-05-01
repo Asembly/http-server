@@ -18,14 +18,19 @@ public class Response extends HttpMessage {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+
         sb.append(getVersion())
                 .append(' ')
                 .append(statusCode)
                 .append('\n');
 
-        getHeaders().forEach((k, v) -> sb.append(k).append(": ").append(v).append('\n'));
+        sb.append("Headers:\n");
+        getHeaders().forEach((k, v) ->
+                sb.append("  ").append(k).append(": ").append(v).append('\n')
+        );
 
-        sb.append("Body: ")
+        sb.append("Body:\n")
+                .append("  length = ")
                 .append(getBody() != null ? getBody().length : 0)
                 .append(" bytes");
 
