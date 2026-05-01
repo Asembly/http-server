@@ -28,7 +28,7 @@ public class HttpServer {
     private final StateManager stateManager;
 
     public HttpServer(Config config) throws UnknownHostException {
-        this.config = config;
+        HttpServer.config = config;
         this.address = new InetSocketAddress(
                 config.server.host(),
                 config.server.port()

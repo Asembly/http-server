@@ -23,9 +23,9 @@ public class ClientState {
     private ByteBuffer output;
 
     private ParsingState parsingState = ParsingState.START_LINE;
+    private FileTransferState fileState;
 
     private byte[] body;
-    private FileTransferState fileState;
 
     public ClientState() {
         this.input = ByteBuffer.allocate(8192);

@@ -49,42 +49,36 @@ public class SelectorWorker {
                     if(!key.isValid())
                         continue;
 
-                    try {
-                        if (key.isReadable()) {
-                            stateManager.onReadable(key);
-                        } else if (key.isWritable()) {
-                            stateManager.onWritable(key);
-                        } else if (key.isConnectable()) {
-                            isConnectable(key);
-                        }
-                    } catch (IOException e) {
-                        key.cancel();
-                        try {
-                            key.channel().close();
-                        } catch (IOException ignore) {}
+                    if (key.isReadable()) {
+                        stateManager.onReadable(key);
+                    } else if (key.isWritable()) {
+                        stateManager.onWritable(key);
+                    } else if (key.isConnectable()) {
+                        isConnectable(key);
                     }
                 }
             }
         }
         catch (IOException e) {
             log.error(e.getMessage());
-            log.error("StackTrace: {}", e.getStackTrace());
-
         }
     }
 
     private void isConnectable(SelectionKey key)
     {
         SocketChannel upstream = (SocketChannel) key.channel();
+        ProxyState state = (ProxyState) key.attachment();
         try {
             if (upstream.finishConnect()) {
+
+                log.debug("Proxy to {}", upstream.getRemoteAddress());
+
                 key.interestOps(SelectionKey.OP_WRITE);
             } else {
                 key.interestOps(SelectionKey.OP_CONNECT);
             }
         }
         catch (IOException e) {
-            ProxyState state = (ProxyState) key.attachment();
 
             SocketChannel client = state.getClient();
             ClientState clientState = state.getClientState();
