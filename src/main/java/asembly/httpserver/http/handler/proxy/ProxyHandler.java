@@ -42,8 +42,6 @@ public class ProxyHandler implements AsyncHandler {
 
         var routeUpstream = proxyService.getBalancer(serviceName).choose();
 
-
-
         proxyService.proxy(upstreamRequest, routeUpstream, key);
     }
 }

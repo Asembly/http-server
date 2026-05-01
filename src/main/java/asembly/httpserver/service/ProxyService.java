@@ -3,7 +3,7 @@ package asembly.httpserver.service;
 import asembly.httpserver.HttpServer;
 import asembly.httpserver.config.entity.PathConfig;
 import asembly.httpserver.enums.LoadBalancerType;
-import asembly.httpserver.exception.BalancerNotFoundException;
+import asembly.httpserver.exception.InternalException;
 import asembly.httpserver.http.Request;
 import asembly.httpserver.http.RequestSerializer;
 import asembly.httpserver.http.handler.proxy.LoadBalancer;
@@ -32,10 +32,10 @@ public class ProxyService {
             );
     }
 
-    public LoadBalancer getBalancer(String serviceName) throws BalancerNotFoundException {
+    public LoadBalancer getBalancer(String serviceName) throws InternalException {
         var balancer = balancers.get(serviceName);
         if(balancer == null)
-            throw new BalancerNotFoundException("Balancer with this service name: " + serviceName + " not found");
+            throw new InternalException("Balancer with this service name: " + serviceName + " not found");
         return balancer;
     }
 
