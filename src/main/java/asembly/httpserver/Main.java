@@ -1,6 +1,6 @@
 package asembly.httpserver;
 
-import asembly.httpserver.config.ServerConfig;
+import asembly.httpserver.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ public class Main {
     public static void main(String[] args) {
         try {
 
-            ServerConfig config = ServerConfig.loadConfig(Paths.get("config.json"));
+            Config config = Config.loadConfig(Paths.get("config.json"));
 
             log.info("Config file is loaded");
 

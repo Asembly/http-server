@@ -1,6 +1,6 @@
 package asembly.httpserver;
 
-import asembly.httpserver.config.ServerConfig;
+import asembly.httpserver.config.Config;
 import asembly.httpserver.http.StateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,18 +20,18 @@ public class HttpServer {
 
     private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
 
-    public static ServerConfig config;
+    public static Config config;
     private static int idx = 0;
 
     private final InetSocketAddress address;
     private final List<SelectorWorker> workers;
     private final StateManager stateManager;
 
-    public HttpServer(ServerConfig config) throws UnknownHostException {
+    public HttpServer(Config config) throws UnknownHostException {
         this.config = config;
         this.address = new InetSocketAddress(
-                config.serverConfig.host(),
-                config.serverConfig.port()
+                config.server.host(),
+                config.server.port()
         );
         this.workers = new ArrayList<>();
         this.stateManager = new StateManager();
@@ -39,7 +39,7 @@ public class HttpServer {
 
     public void start() throws IOException {
 
-        int n = config.serverConfig.threads();
+        int n = config.server.threads();
         for (int i = 0; i < n; i++) {
             SelectorWorker w = new SelectorWorker("worker - " + i, stateManager);
             workers.add(w);
