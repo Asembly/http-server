@@ -5,7 +5,6 @@ public record ServerConfig(
         String root,
         int port,
         int threads,
-        int readTimeoutMs,
-        int writeTimeoutMs
+        int timeoutMs
 ) {
 }
