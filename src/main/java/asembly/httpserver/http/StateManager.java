@@ -38,6 +38,8 @@ public class StateManager {
         SocketChannel client = (SocketChannel) key.channel();
         ClientState state = (ClientState) key.attachment();
 
+        state.setStartOperationMs(System.currentTimeMillis());
+
         try {
             if(key.attachment() instanceof ProxyState)
                 onProxyState(key, (ProxyState) state);
@@ -76,6 +78,8 @@ public class StateManager {
 
         SocketChannel client = (SocketChannel) key.channel();
         ClientState state = (ClientState) key.attachment();
+
+        state.setStartOperationMs(System.currentTimeMillis());
 
         var output = state.getOutput();
 

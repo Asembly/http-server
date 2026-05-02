@@ -39,9 +39,17 @@ public class SelectorWorker {
     public void run(){
         try {
             while (true) {
-                selector.select();
-
+                int ready = selector.select(1000);
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+
+                long now = System.currentTimeMillis();
+
+                if(ready == 0)
+                {
+                    checkTimeouts(now);
+                    continue;
+                }
+
                 while (it.hasNext()) {
                     SelectionKey key = it.next();
                     it.remove();
@@ -88,6 +96,28 @@ public class SelectorWorker {
             var responseData = ResponseSerializer.toByteBuffer(response);
             clientState.setOutput(responseData);
             client.keyFor(key.selector()).interestOps(SelectionKey.OP_WRITE);
+        }
+    }
+
+    private void checkTimeouts(long now)
+    {
+        for(SelectionKey key: selector.keys())
+        {
+            if(!key.isValid()) continue;
+            if (!(key.attachment() instanceof ClientState state)) continue;
+
+            long leadTime = now - state.getStartOperationMs();
+
+            try {
+                if (leadTime > HttpServer.config.server.timeoutMs()) {
+                    log.info("Closing idle connection {}, time: {}",
+                            key.channel(), leadTime);
+                    key.cancel();
+                    key.channel().close();
+                }
+            } catch (IOException e) {
+                log.error("Error closing idle channel: {}", e.getMessage(), e);
+            }
         }
     }
 

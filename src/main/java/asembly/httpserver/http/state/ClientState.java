@@ -25,6 +25,8 @@ public class ClientState {
     private ParsingState parsingState = ParsingState.START_LINE;
     private FileTransferState fileState;
 
+    private long startOperationMs;
+
     private byte[] body;
 
     public ClientState() {
@@ -33,6 +35,7 @@ public class ClientState {
 
         this.startLine = new ArrayList<>();
         this.headers = new HashMap<>();
+        this.startOperationMs = System.currentTimeMillis();
     }
 
     //getter
@@ -51,6 +54,9 @@ public class ClientState {
     public Request getRequest() { return request; }
     public ByteBuffer getOutput() {
         return output;
+    }
+    public long getStartOperationMs() {
+        return startOperationMs;
     }
 
     //setter
@@ -73,7 +79,9 @@ public class ClientState {
     public FileTransferState getFileState() {
         return fileState;
     }
-
+    public void setStartOperationMs(long startOperationMs) {
+        this.startOperationMs = startOperationMs;
+    }
 
     //reset current state
     public void reset()
