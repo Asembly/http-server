@@ -23,7 +23,7 @@ public class RouteDispatcher {
         router.addHandler("get",  "/" + HttpServer.config.directory.publicRoot(), staticHandler);
         router.addHandler("get",  "/favicon.ico", staticHandler);
         router.addHandler("get", "/api", proxyHandler);
-        router.addHandler("port", "/api", proxyHandler);
+        router.addHandler("post", "/api", proxyHandler);
 
         var autoIndex =  HttpServer.config.auto_index;
         for(var location: autoIndex.locations())
