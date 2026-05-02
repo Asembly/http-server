@@ -10,6 +10,8 @@ import asembly.httpserver.http.handler.proxy.LoadBalancer;
 import asembly.httpserver.http.handler.proxy.LoadBalancerFactory;
 import asembly.httpserver.http.state.ClientState;
 import asembly.httpserver.http.state.ProxyState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -21,15 +23,17 @@ import java.util.Map;
 
 public class ProxyService {
 
+    private static final Logger log = LoggerFactory.getLogger(ProxyService.class);
     private final Map<String, LoadBalancer> balancers = new HashMap<>();
 
     public ProxyService()
     {
-        for(var item: HttpServer.config.upstream.entrySet())
+        for(var item: HttpServer.config.upstream.entrySet()) {
             balancers.put(item.getKey(), LoadBalancerFactory.create(
                     LoadBalancerType.fromString(item.getValue().balancer()),
                     item.getValue().routes())
             );
+        }
     }
 
     public LoadBalancer getBalancer(String serviceName) throws InternalException {
